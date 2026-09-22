@@ -1,0 +1,1992 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Capa das Frutas — Loja Blox Fruits</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#0b0710; --bg-deep:#05030a; --panel:#150e1c; --panel-2:#1d1426;
+  --line:#332140; --line-soft:#241830; --ink:#f2eef7; --ink-dim:#b3a3c2; --ink-faint:#6e5d80;
+  --teal:#e6304f; --teal-dim:#8f1f38; --gold:#e8b94b; --coral:#ff5470; --violet:#8b7bf0;
+  --ink-on-accent:#1a0509;
+  --radius:3px;
+}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 0 0 rgba(230,48,79,.55),0 0 18px rgba(230,48,79,.35);}50%{box-shadow:0 0 0 6px rgba(230,48,79,0),0 0 30px rgba(230,48,79,.55);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+@keyframes flicker{0%,100%{opacity:1;}45%{opacity:.72;}52%{opacity:.9;}}
+#emberCanvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.55;}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--bg);color:var(--ink);font-family:'Space Grotesk',system-ui,sans-serif;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);-webkit-font-smoothing:antialiased;}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+.mono{font-family:'IBM Plex Mono',monospace;}
+body::before{content:"";position:fixed;inset:0;background:radial-gradient(1100px 500px at 15% -5%, rgba(230,48,79,.14), transparent 60%),radial-gradient(900px 600px at 100% 10%, rgba(139,123,240,.10), transparent 55%),radial-gradient(700px 500px at 50% 100%, rgba(230,48,79,.08), transparent 60%);pointer-events:none;z-index:0;}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px;position:relative;z-index:1;}
+
+.topbar{border-bottom:1px solid var(--line-soft);background:rgba(6,12,20,.85);backdrop-filter:blur(8px);position:sticky;top:0;z-index:50;padding-top:env(safe-area-inset-top,0px);}
+.topbar-inner{max-width:1180px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand-mark{width:32px;height:32px;border:1px solid var(--teal);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--teal);font-size:15px;flex-shrink:0;box-shadow:0 0 10px rgba(230,48,79,.5);animation:flicker 3.2s ease-in-out infinite;}
+.brand-text{display:flex;flex-direction:column;line-height:1.15;}
+.brand-text strong{font-size:15px;font-weight:700;letter-spacing:.01em;}
+.brand-text span{font-size:11px;color:var(--ink-faint);font-family:'IBM Plex Mono',monospace;}
+.topnav{display:flex;align-items:center;gap:18px;}
+.topnav a{color:var(--ink-dim);text-decoration:none;font-size:14px;transition:color .15s;}
+.topnav a:hover{color:var(--ink);}
+.top-actions{display:flex;align-items:center;gap:10px;}
+.icon-btn{background:var(--panel-2);border:1px solid var(--line);color:var(--ink-dim);width:36px;height:36px;border-radius:var(--radius);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.icon-btn:hover{border-color:var(--teal-dim);color:var(--ink);}
+.cart-btn{position:relative;background:var(--panel-2);border:1px solid var(--line);color:var(--ink);padding:9px 16px;border-radius:var(--radius);font-size:14px;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-weight:500;display:flex;align-items:center;gap:8px;}
+.cart-btn:hover{border-color:var(--teal-dim);}
+.cart-count{background:var(--teal);color:var(--ink-on-accent);font-size:11px;font-weight:700;min-width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:0 4px;}
+
+.hero{padding:56px 0 36px;border-bottom:1px solid var(--line-soft);}
+.hero-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:56px;align-items:end;}
+.eyebrow-line{display:flex;align-items:center;gap:10px;color:var(--ink-faint);font-family:'IBM Plex Mono',monospace;font-size:12px;margin-bottom:22px;}
+.eyebrow-line .dot{width:6px;height:6px;border-radius:50%;background:var(--teal);box-shadow:0 0 8px var(--teal);}
+h1.hero-title{font-size:clamp(34px,5vw,56px);line-height:1.05;font-weight:700;letter-spacing:-.02em;margin:0 0 18px;}
+h1.hero-title em{font-style:normal;color:var(--teal);text-shadow:0 0 24px rgba(230,48,79,.45);}
+.hero-sub{color:var(--ink-dim);font-size:15.5px;line-height:1.6;max-width:46ch;margin:0 0 26px;}
+.hero-cta{display:flex;gap:14px;flex-wrap:wrap;}
+.btn{padding:13px 22px;border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;border:1px solid transparent;transition:transform .12s,background .15s,border-color .15s;font-family:'Space Grotesk',sans-serif;}
+.btn:active{transform:scale(.98);}
+.btn-primary{background:var(--teal);color:var(--ink-on-accent);animation:pulseGlow 2.6s ease-in-out infinite;}
+.btn-primary:hover{background:#ff4568;}
+.btn-ghost{background:transparent;border-color:var(--line);color:var(--ink);}
+.btn-ghost:hover{border-color:var(--ink-dim);}
+.manifest-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;}
+.manifest-head{padding:14px 18px;border-bottom:1px solid var(--line-soft);display:flex;justify-content:space-between;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-faint);}
+.manifest-row{padding:13px 18px;border-bottom:1px solid var(--line-soft);display:flex;justify-content:space-between;align-items:center;font-size:13px;}
+.manifest-row:last-child{border-bottom:none;}
+.manifest-row .tag{font-family:'IBM Plex Mono',monospace;font-size:10.5px;padding:2px 7px;border-radius:2px;}
+.tag-mythical{background:rgba(255,84,112,.14);color:var(--coral);box-shadow:0 0 10px rgba(255,84,112,.25);}
+.tag-legendary{background:rgba(232,185,75,.14);color:var(--gold);}
+.tag-rare{background:rgba(139,123,240,.14);color:var(--violet);}
+.tag-uncommon{background:rgba(230,48,79,.10);color:var(--teal);}
+.tag-comum{background:rgba(143,166,184,.12);color:var(--ink-dim);}
+
+.section{padding:52px 0;border-bottom:1px solid var(--line-soft);}
+.section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:26px;flex-wrap:wrap;}
+.section-head h2{font-size:24px;font-weight:700;margin:0 0 6px;letter-spacing:-.01em;}
+.section-head p{color:var(--ink-faint);font-size:13.5px;margin:0;max-width:56ch;}
+.section-index{font-family:'IBM Plex Mono',monospace;color:var(--ink-faint);font-size:12px;}
+
+.cat-tabs{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap;}
+.cat-tab{padding:9px 18px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);color:var(--ink-dim);font-size:13.5px;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-weight:500;}
+.cat-tab:hover{border-color:var(--ink-dim);color:var(--ink);}
+.cat-tab.active{background:var(--teal);border-color:var(--teal);color:var(--ink-on-accent);}
+
+.filterbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px;align-items:center;}
+.chip{padding:7px 14px;border:1px solid var(--line);border-radius:20px;font-size:12.5px;color:var(--ink-dim);cursor:pointer;background:transparent;font-family:'Space Grotesk',sans-serif;transition:border-color .15s,color .15s,background .15s;white-space:nowrap;}
+.chip:hover{border-color:var(--ink-dim);color:var(--ink);}
+.chip.active{background:var(--teal);border-color:var(--teal);color:var(--ink-on-accent);font-weight:600;}
+.search-input{margin-left:auto;background:var(--panel);border:1px solid var(--line);color:var(--ink);padding:9px 14px;border-radius:20px;font-size:13px;width:220px;max-width:100%;font-family:'Space Grotesk',sans-serif;}
+.search-input::placeholder{color:var(--ink-faint);}
+.search-input:focus{outline:none;border-color:var(--teal-dim);}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;display:flex;flex-direction:column;gap:10px;transition:border-color .2s,transform .2s,box-shadow .2s;opacity:0;transform:translateY(14px);}
+.card.in{animation:fadeUp .5s ease forwards;}
+.card:hover{border-color:var(--teal-dim);transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.4),0 0 0 1px rgba(230,48,79,.25),0 0 24px rgba(230,48,79,.18);}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+.card-icon{width:44px;height:44px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;background:var(--panel-2);border:1px solid var(--line-soft);overflow:hidden;}
+.card-icon img{width:100%;height:100%;object-fit:cover;}
+.card-name{font-size:16px;font-weight:600;margin:8px 0 2px;line-height:1.25;}
+.card-type{color:var(--ink-faint);font-size:12px;font-family:'IBM Plex Mono',monospace;}
+.card-desc{color:var(--ink-dim);font-size:12.5px;line-height:1.5;flex:1;margin:4px 0 2px;}
+.card-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:12px;border-top:1px solid var(--line-soft);}
+.card-price{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;color:var(--teal);}
+.card-price .sub{color:var(--ink-faint);font-size:11px;font-weight:400;display:block;margin-top:1px;font-family:'Space Grotesk',sans-serif;}
+.add-btn{background:var(--panel-2);border:1px solid var(--line);color:var(--ink);width:34px;height:34px;border-radius:var(--radius);cursor:pointer;font-size:18px;line-height:1;display:flex;align-items:center;justify-content:center;transition:background .15s,border-color .15s;}
+.add-btn:hover{background:var(--teal);border-color:var(--teal);color:var(--ink-on-accent);}
+.add-btn:disabled{opacity:.35;cursor:not-allowed;}
+.badge-empty{color:var(--ink-faint);font-size:13px;padding:40px 0;text-align:center;grid-column:1/-1;}
+
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line-soft);border:1px solid var(--line-soft);border-radius:var(--radius);overflow:hidden;}
+.step{background:var(--panel);padding:24px 22px;}
+.step-num{font-family:'IBM Plex Mono',monospace;color:var(--teal);font-size:12px;margin-bottom:12px;}
+.step h3{font-size:15.5px;margin:0 0 8px;font-weight:600;}
+.step p{color:var(--ink-dim);font-size:13px;line-height:1.55;margin:0;}
+
+.trust{display:flex;gap:0;flex-wrap:wrap;border:1px solid var(--line-soft);border-radius:var(--radius);overflow:hidden;}
+.trust-item{flex:1;min-width:150px;padding:18px 20px;border-right:1px solid var(--line-soft);}
+.trust-item:last-child{border-right:none;}
+.trust-item .n{font-family:'IBM Plex Mono',monospace;color:var(--gold);font-size:20px;font-weight:600;}
+.trust-item .l{color:var(--ink-faint);font-size:12px;margin-top:4px;}
+
+.reviews-grid{display:grid;grid-template-columns:260px 1fr;gap:20px;align-items:start;}
+.reviews-summary{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px;text-align:center;position:sticky;top:80px;}
+.rs-score{font-size:38px;font-weight:700;color:var(--teal);line-height:1;}
+.rs-stars{color:var(--gold);font-size:18px;letter-spacing:2px;margin:8px 0 4px;}
+.rs-count{color:var(--ink-faint);font-size:12px;font-family:'IBM Plex Mono',monospace;}
+.rs-bars{margin-top:16px;display:flex;flex-direction:column;gap:6px;text-align:left;}
+.rs-bar-row{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--ink-faint);font-family:'IBM Plex Mono',monospace;}
+.rs-bar-track{flex:1;height:5px;background:var(--panel-2);border-radius:4px;overflow:hidden;}
+.rs-bar-fill{height:100%;background:var(--teal);}
+.reviews-list{display:flex;flex-direction:column;gap:12px;}
+.review-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;}
+.review-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px;}
+.review-name{font-weight:600;font-size:13.5px;}
+.review-stars{color:var(--gold);font-size:13px;letter-spacing:1px;}
+.review-date{color:var(--ink-faint);font-size:11px;font-family:'IBM Plex Mono',monospace;}
+.review-text{color:var(--ink-dim);font-size:13px;line-height:1.55;word-break:break-word;}
+.reviews-empty{color:var(--ink-faint);font-size:13.5px;padding:30px 0;text-align:center;}
+.star-picker{display:flex;gap:6px;}
+.star-opt{background:var(--panel-2);border:1px solid var(--line);color:var(--ink-faint);width:38px;height:38px;border-radius:var(--radius);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .15s,border-color .15s;}
+.star-opt.active,.star-opt:hover{color:var(--gold);border-color:var(--gold);}
+.offline-banner{position:fixed;top:0;left:0;right:0;background:var(--coral);color:var(--ink-on-accent);text-align:center;font-size:12.5px;font-weight:600;padding:8px 12px;z-index:200;transform:translateY(-100%);transition:transform .25s ease;padding-top:calc(8px + env(safe-area-inset-top,0px));}
+.offline-banner.show{transform:translateY(0);}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px;}
+.fav-btn{background:none;border:none;color:var(--ink-faint);font-size:17px;cursor:pointer;line-height:1;padding:2px 4px;transition:color .15s,transform .15s;}
+.fav-btn:hover{color:var(--coral);transform:scale(1.15);}
+.fav-btn.active{color:var(--coral);}
+.burst-particle{position:fixed;width:5px;height:5px;border-radius:50%;background:var(--teal);pointer-events:none;z-index:300;left:0;top:0;animation:burstFly .55s ease-out forwards;}
+@keyframes burstFly{from{opacity:1;transform:translate(0,0) scale(1);}to{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.3);}}
+.skip-link{position:fixed;top:-100px;left:12px;background:var(--teal);color:var(--ink-on-accent);padding:10px 16px;border-radius:var(--radius);z-index:999;font-size:13px;font-weight:600;text-decoration:none;transition:top .2s;}
+.skip-link:focus{top:12px;}
+.hero{position:relative;}
+.hero::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(220px circle at var(--mx,50%) var(--my,20%), rgba(230,48,79,.10), transparent 70%);opacity:0;transition:opacity .3s;z-index:0;}
+.hero:hover::after{opacity:1;}
+.kbd-hint{font-family:'IBM Plex Mono',monospace;font-size:10.5px;border:1px solid var(--line);border-radius:3px;padding:1px 6px;color:var(--ink-faint);margin-left:6px;}
+@media (max-width:820px){
+  .reviews-grid{grid-template-columns:1fr;}
+  .reviews-summary{position:static;}
+}
+
+footer{padding:44px 0 calc(30px + env(safe-area-inset-bottom,0px));}
+.footer-brand-block{text-align:center;margin-bottom:28px;}
+.footer-logo{width:46px;height:46px;border:1px solid var(--teal);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--teal);font-size:20px;margin:0 auto 14px;box-shadow:0 0 14px rgba(230,48,79,.5);}
+.footer-name{font-size:19px;font-weight:700;letter-spacing:-.01em;margin-bottom:8px;}
+.footer-tagline{color:var(--ink-faint);font-size:13px;line-height:1.6;max-width:46ch;margin:0 auto;}
+.footer-divider{height:1px;background:var(--line-soft);margin-bottom:24px;}
+.footer-copyright{text-align:center;color:var(--ink-faint);font-size:11.5px;font-family:'IBM Plex Mono',monospace;margin-top:24px;padding-top:20px;border-top:1px solid var(--line-soft);}
+.foot-grid{display:flex;justify-content:space-between;flex-wrap:wrap;gap:24px;align-items:center;}
+.foot-note{color:var(--ink-faint);font-size:12px;max-width:56ch;line-height:1.6;}
+.foot-links{display:flex;gap:20px;align-items:center;}
+.foot-links a{color:var(--ink-dim);text-decoration:none;font-size:13px;}
+.foot-links a:hover{color:var(--teal);}
+.foot-admin{background:none;border:none;color:var(--ink-faint);font-size:11px;cursor:pointer;font-family:'IBM Plex Mono',monospace;}
+.foot-admin:hover{color:var(--ink-dim);}
+
+.overlay{position:fixed;inset:0;background:rgba(4,9,15,.65);z-index:90;opacity:0;pointer-events:none;transition:opacity .2s;}
+.overlay.open{opacity:1;pointer-events:auto;}
+
+.drawer{position:fixed;top:0;right:0;bottom:0;width:380px;max-width:92vw;background:var(--bg-deep);border-left:1px solid var(--line);z-index:91;transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);}
+.drawer.open{transform:translateX(0);}
+.drawer-head{padding:20px 22px;border-bottom:1px solid var(--line-soft);display:flex;justify-content:space-between;align-items:center;}
+.drawer-head h3{font-size:16px;margin:0;font-weight:700;}
+.close-btn{background:none;border:none;color:var(--ink-dim);font-size:22px;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;line-height:1;}
+.close-btn:hover{color:var(--ink);}
+.drawer-items{flex:1;overflow-y:auto;padding:12px 22px;}
+.drawer-empty{color:var(--ink-faint);font-size:13.5px;text-align:center;padding:60px 10px;line-height:1.6;}
+.drawer-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 0;border-bottom:1px solid var(--line-soft);}
+.di-name{font-size:13.5px;font-weight:500;}
+.di-price{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-faint);margin-top:2px;}
+.di-controls{display:flex;align-items:center;gap:8px;}
+.qty-btn{width:24px;height:24px;border-radius:2px;border:1px solid var(--line);background:var(--panel-2);color:var(--ink);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;line-height:1;}
+.qty-val{font-family:'IBM Plex Mono',monospace;font-size:13px;min-width:16px;text-align:center;}
+.di-remove{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:16px;padding:2px 4px;}
+.di-remove:hover{color:var(--coral);}
+.drawer-foot{padding:20px 22px;border-top:1px solid var(--line-soft);}
+.total-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px;}
+.total-row span:first-child{color:var(--ink-dim);font-size:13px;}
+.total-row span:last-child{font-family:'IBM Plex Mono',monospace;font-size:19px;font-weight:600;color:var(--teal);}
+.checkout-btn{width:100%;background:var(--teal);color:var(--ink-on-accent);border:none;padding:14px;border-radius:var(--radius);font-size:14.5px;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;}
+.checkout-btn:hover{background:#3fdcd4;}
+.checkout-btn:disabled{background:var(--panel-2);color:var(--ink-faint);cursor:not-allowed;}
+.drawer-hint{color:var(--ink-faint);font-size:11px;margin-top:10px;text-align:center;line-height:1.5;}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(4,9,15,.75);z-index:120;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--bg-deep);border:1px solid var(--line);border-radius:var(--radius);width:100%;max-width:440px;max-height:88vh;overflow-y:auto;}
+.modal-wide{max-width:780px;}
+.modal-head{padding:20px 22px;border-bottom:1px solid var(--line-soft);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--bg-deep);z-index:2;}
+.modal-head h3{font-size:16px;margin:0;font-weight:700;}
+.modal-body{padding:22px;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:12px;color:var(--ink-dim);margin-bottom:6px;font-family:'IBM Plex Mono',monospace;}
+.field input,.field select{width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--ink);padding:10px 12px;border-radius:var(--radius);font-size:14px;font-family:'Space Grotesk',sans-serif;}
+.field input:focus,.field select:focus{outline:none;border-color:var(--teal-dim);}
+.field-row{display:flex;gap:12px;}
+.field-row .field{flex:1;}
+.modal-error{color:var(--coral);font-size:12.5px;margin-bottom:14px;display:none;}
+.modal-error.show{display:block;}
+
+.pix-box{text-align:center;}
+.payment-method-label{text-align:left;font-size:12px;color:var(--ink-faint);font-family:'IBM Plex Mono',monospace;margin-bottom:10px;}
+.payment-method-row{display:flex;align-items:center;gap:12px;background:var(--panel-2);border:1px solid var(--teal);border-radius:var(--radius);padding:14px 16px;margin-bottom:20px;text-align:left;}
+.payment-method-icon{font-size:18px;color:var(--teal);flex-shrink:0;}
+.payment-method-info{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0;}
+.payment-method-name{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.payment-method-badge{font-size:10px;font-weight:600;color:var(--teal);background:rgba(47,208,201,.12);padding:2px 7px;border-radius:10px;font-family:'IBM Plex Mono',monospace;}
+.payment-method-desc{font-size:11.5px;color:var(--ink-faint);}
+.payment-method-check{color:var(--teal);font-size:16px;flex-shrink:0;}
+.pix-qr{background:#fff;padding:14px;border-radius:var(--radius);display:inline-block;margin-bottom:16px;}
+.pix-key-row{display:flex;gap:8px;margin-bottom:18px;}
+.pix-key-row input{flex:1;background:var(--panel-2);border:1px solid var(--line);color:var(--ink);padding:10px 12px;border-radius:var(--radius);font-family:'IBM Plex Mono',monospace;font-size:13px;}
+.pix-copy{background:var(--teal);border:none;color:var(--ink-on-accent);padding:0 16px;border-radius:var(--radius);font-weight:600;cursor:pointer;font-size:13px;}
+.pix-total{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:700;color:var(--teal);margin-bottom:6px;}
+.pix-sub{color:var(--ink-faint);font-size:12px;margin-bottom:20px;}
+
+.admin-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+.admin-table th{text-align:left;color:var(--ink-faint);font-family:'IBM Plex Mono',monospace;font-size:11px;padding:8px 6px;border-bottom:1px solid var(--line-soft);}
+.admin-table td{padding:6px;border-bottom:1px solid var(--line-soft);}
+.admin-table input,.admin-table select{width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--ink);padding:6px 8px;border-radius:2px;font-size:12.5px;font-family:'Space Grotesk',sans-serif;}
+.admin-table .col-check{width:34px;text-align:center;}
+.admin-table .col-actions{width:34px;}
+.row-del{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:15px;}
+.row-del:hover{color:var(--coral);}
+.admin-section{margin-bottom:28px;}
+.admin-section h4{font-size:13.5px;margin:0 0 12px;color:var(--ink);text-transform:none;}
+.admin-add{background:var(--panel-2);border:1px dashed var(--line);color:var(--ink-dim);padding:9px 14px;border-radius:var(--radius);font-size:12.5px;cursor:pointer;margin-top:10px;font-family:'Space Grotesk',sans-serif;}
+.admin-add:hover{border-color:var(--teal-dim);color:var(--ink);}
+.admin-save-bar{position:sticky;bottom:0;background:var(--bg-deep);border-top:1px solid var(--line-soft);padding:16px 22px;display:flex;gap:10px;justify-content:flex-end;margin:0 -22px -22px;}
+.admin-note{color:var(--ink-faint);font-size:11.5px;line-height:1.6;background:var(--panel-2);border:1px solid var(--line-soft);border-radius:var(--radius);padding:12px 14px;margin-bottom:20px;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--teal-dim);color:var(--ink);padding:11px 20px;border-radius:var(--radius);font-size:13px;z-index:200;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(-6px);}
+
+@media (max-width:820px){
+  .hero-grid{grid-template-columns:1fr;gap:32px;}
+  .topnav{display:none;}
+  .steps{grid-template-columns:1fr;}
+  .trust-item{flex:1 1 45%;}
+  .field-row{flex-direction:column;gap:0;}
+}
+</style>
+</head>
+<body>
+<a href="#catalogo" class="skip-link">Pular para o catálogo</a>
+<canvas id="emberCanvas"></canvas>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-mark"><img src="data:image/jpeg;base64,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" alt="Logo Capa das Frutas" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></div>
+      <div class="brand-text">
+        <strong>Capa das Frutas</strong>
+        <span>loja independente · blox fruits</span>
+      </div>
+    </div>
+    <div class="topnav">
+      <a href="#catalogo">Catálogo</a>
+      <a href="#como-funciona">Como funciona</a>
+      <a href="#contato">Contato</a>
+    </div>
+    <div class="top-actions">
+      <button class="cart-btn" id="customerAuthBtn">Entrar</button>
+      <button class="cart-btn" id="openCart">Encomenda <span class="cart-count" id="cartCount">0</span></button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <section class="hero">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow-line"><span class="dot"></span>manifesto atualizado hoje</div>
+        <h1 class="hero-title">Frutas físicas, Robux<br>e Gamepasses de<br><em>Blox Fruits</em>.</h1>
+        <p class="hero-sub">Catálogo independente, sem vínculo com a equipe do jogo. Monte sua encomenda, pague via Pix e confirme direto com o vendedor — sem cadastro, sem enrolação.</p>
+        <div class="hero-cta">
+          <a href="#catalogo" class="btn btn-primary">Ver catálogo</a>
+          <a href="#como-funciona" class="btn btn-ghost">Como funciona</a>
+        </div>
+      </div>
+      <div class="manifest-card">
+        <div class="manifest-head"><span>MANIFESTO · DESTAQUES</span><span id="heroCount">0 ITENS</span></div>
+        <div id="heroList"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="catalogo">
+    <div class="section-head">
+      <div>
+        <h2>Catálogo</h2>
+        <p>Preços em Reais. Estoque muda conforme a rotação do jogo — confirme disponibilidade antes de pagar.</p>
+      </div>
+      <div class="section-index mono">01 / CARGA</div>
+    </div>
+
+    <div class="cat-tabs" id="catTabs">
+      <button class="cat-tab active" data-cat="todos">Todos</button>
+      <button class="cat-tab" data-cat="fruta-fisica">Frutas Físicas Perm.</button>
+      <button class="cat-tab" data-cat="robux">Robux</button>
+      <button class="cat-tab" data-cat="gamepass">Gamepasses</button>
+      <button class="cat-tab" data-cat="favoritos">♡ Favoritos</button>
+    </div>
+
+    <div class="filterbar" id="filterbar">
+      <button class="chip active" data-filter="todos">Todas raridades</button>
+      <button class="chip" data-filter="mythical">Míticas</button>
+      <button class="chip" data-filter="legendary">Lendárias</button>
+      <button class="chip" data-filter="rare">Raras</button>
+      <button class="chip" data-filter="uncommon">Incomuns</button>
+      <input type="text" class="search-input" id="searchInput" placeholder="Buscar item...">
+    </div>
+
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section class="section" id="como-funciona">
+    <div class="section-head">
+      <div>
+        <h2>Como funciona</h2>
+        <p>Pagamento via Pix, confirmado direto com o vendedor — sem checkout automático.</p>
+      </div>
+      <div class="section-index mono">02 / PROCESSO</div>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num mono">01</div>
+        <h3>Monte a encomenda</h3>
+        <p>Adicione frutas físicas, Robux ou Gamepasses no carrinho lateral. Ajuste as quantidades livremente.</p>
+      </div>
+      <div class="step">
+        <div class="step-num mono">02</div>
+        <h3>Pague via Pix</h3>
+        <p>Ao fechar a encomenda, aparece a chave Pix e o QR Code para pagamento do valor exato.</p>
+      </div>
+      <div class="step">
+        <div class="step-num mono">03</div>
+        <h3>Envie o comprovante</h3>
+        <p>Depois de pagar, envie o comprovante pelo WhatsApp ou Discord para combinar a entrega in-game.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="border-bottom:none;">
+    <div class="trust">
+      <div class="trust-item"><div class="n mono" data-count="300" data-suffix="+">0</div><div class="l">encomendas entregues</div></div>
+      <div class="trust-item"><div class="n mono" data-count="18" data-suffix="">0</div><div class="l">meses de operação</div></div>
+      <div class="trust-item"><div class="n mono" data-count="100" data-suffix="%">0</div><div class="l">combinado antes de pagar</div></div>
+      <div class="trust-item"><div class="n mono" data-count="0" data-suffix="">0</div><div class="l">vínculo com a Bloxfruits / Gamer Robot Inc.</div></div>
+    </div>
+  </section>
+
+  <section class="section" id="avaliacoes" style="border-bottom:none;">
+    <div class="section-head">
+      <div>
+        <h2>Avaliações</h2>
+        <p>Feedback de quem já comprou. As avaliações ficam salvas neste site e podem ser moderadas no painel de configuração.</p>
+      </div>
+      <div class="section-index mono">03 / FEEDBACK</div>
+    </div>
+
+    <div class="reviews-grid">
+      <div class="reviews-summary">
+        <div class="rs-score mono" id="rsScore">0.0</div>
+        <div class="rs-stars" id="rsStars" aria-hidden="true">★★★★★</div>
+        <div class="rs-count" id="rsCount">0 avaliações</div>
+        <div class="rs-bars" id="rsBars"></div>
+        <button class="btn btn-primary" id="openReviewForm" style="width:100%;justify-content:center;margin-top:16px;">Deixar avaliação</button>
+      </div>
+
+      <div class="reviews-list" id="reviewsList"></div>
+    </div>
+  </section>
+</div>
+
+<footer id="contato">
+  <div class="wrap">
+    <div class="footer-brand-block">
+      <div class="footer-logo"><img src="data:image/jpeg;base64,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" alt="Logo Capa das Frutas" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></div>
+      <div class="footer-name">Capa das Frutas</div>
+      <div class="footer-tagline">Sua loja independente de Blox Fruits: fruta física, Robux e Gamepasses — combinado direto com o vendedor, sem enrolação.</div>
+    </div>
+
+    <div class="footer-divider"></div>
+
+    <div class="foot-grid">
+      <p class="foot-note">Capa das Frutas é uma loja independente de terceiros. Não temos qualquer afiliação, patrocínio ou vínculo oficial com a Gamer Robot Inc. ou com Blox Fruits. Os itens listados dizem respeito a bens virtuais dentro do jogo Roblox.</p>
+      <div class="foot-links">
+        <a href="https://discord.gg/tFMqdUH62" target="_blank" rel="noopener">Entrar no Discord</a>
+        <a href="#catalogo">Catálogo</a>
+        <a href="#avaliacoes">Avaliações</a>
+        <button class="foot-admin" id="openAdmin">⚙ configuração</button>
+      </div>
+    </div>
+
+    <div class="footer-copyright">Copyright © 2026 Capa das Frutas — Todos os direitos reservados<br>Desenvolvido por Urahara</div>
+  </div>
+</footer>
+
+<div class="overlay" id="overlay"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <h3>Sua encomenda</h3>
+    <button class="close-btn" id="closeCart" aria-label="Fechar">×</button>
+  </div>
+  <div class="drawer-items" id="drawerItems"></div>
+  <div class="drawer-foot">
+    <div class="total-row"><span>Total estimado</span><span id="totalValue">R$ 0</span></div>
+    <button class="checkout-btn" id="checkoutBtn" disabled>Fechar encomenda · Pagar via Pix</button>
+    <button class="btn btn-ghost" id="copyOrderBtn" style="width:100%;justify-content:center;margin-top:8px;">Copiar resumo da encomenda</button>
+    <div class="drawer-hint">O pagamento é feito via Pix. A entrega é combinada com o vendedor após o comprovante. <span class="kbd-hint">/</span> abre a busca</div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="pixOverlay">
+  <div class="modal">
+    <div class="modal-head"><h3>Finalizar encomenda</h3><button class="close-btn" id="closePix" aria-label="Fechar">×</button></div>
+    <div class="modal-body pix-box">
+      <div class="payment-method-label">Escolha o pagamento</div>
+      <div class="payment-method-row active" aria-pressed="true">
+        <span class="payment-method-icon">◈</span>
+        <span class="payment-method-info">
+          <span class="payment-method-name">Pix <span class="payment-method-badge">Mais rápido</span></span>
+          <span class="payment-method-desc">Confirmação manual após envio do comprovante</span>
+        </span>
+        <span class="payment-method-check">✓</span>
+      </div>
+
+      <div class="pix-total" id="pixTotal">R$ 0</div>
+      <div class="pix-sub">Valor exato da sua encomenda</div>
+      <div class="pix-qr"><div id="qrcodeCanvas"></div></div>
+      <div class="pix-key-row">
+        <input type="text" id="pixKeyInput" readonly>
+        <button class="pix-copy" id="copyPixBtn">Copiar</button>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" id="sendProofBtn">Já paguei, enviar comprovante</button>
+      <div class="drawer-hint" style="margin-top:14px;">Depois de pagar, mande o print do comprovante na conversa que abrir.</div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="reviewOverlay">
+  <div class="modal">
+    <div class="modal-head"><h3>Deixar avaliação</h3><button class="close-btn" id="closeReview" aria-label="Fechar">×</button></div>
+    <div class="modal-body">
+      <div class="modal-error" id="reviewError">Preencha nome, nota e um comentário de até 400 caracteres.</div>
+      <div class="field"><label for="reviewNome">Seu nome</label><input type="text" id="reviewNome" maxlength="40" autocomplete="off"></div>
+      <div class="field">
+        <label>Nota</label>
+        <div class="star-picker" id="starPicker" role="radiogroup" aria-label="Nota de 1 a 5 estrelas">
+          <button type="button" class="star-opt" data-val="1" aria-label="1 estrela">★</button>
+          <button type="button" class="star-opt" data-val="2" aria-label="2 estrelas">★</button>
+          <button type="button" class="star-opt" data-val="3" aria-label="3 estrelas">★</button>
+          <button type="button" class="star-opt" data-val="4" aria-label="4 estrelas">★</button>
+          <button type="button" class="star-opt" data-val="5" aria-label="5 estrelas">★</button>
+        </div>
+      </div>
+      <div class="field"><label for="reviewTexto">Comentário</label><input type="text" id="reviewTexto" maxlength="400" autocomplete="off"></div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" id="reviewSubmit">Publicar avaliação</button>
+      <div class="drawer-hint" style="margin-top:12px;">A avaliação fica salva neste site e pode ser removida pelo administrador se for spam ou ofensiva.</div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="customerAuthOverlay">
+  <div class="modal">
+    <div class="modal-head"><h3 id="customerAuthTitle">Entrar na sua conta</h3><button class="close-btn" id="closeCustomerAuth" aria-label="Fechar">×</button></div>
+    <div class="modal-body">
+      <div class="modal-error" id="customerAuthError">Verifique os dados e tente novamente.</div>
+      <div class="field" id="customerNomeField" style="display:none;"><label for="customerNome">Seu nome</label><input type="text" id="customerNome" maxlength="40" autocomplete="name"></div>
+      <div class="field"><label for="customerEmail">E-mail</label><input type="email" id="customerEmail" autocomplete="email"></div>
+      <div class="field"><label for="customerPass">Senha</label><input type="password" id="customerPass" autocomplete="current-password"></div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" id="customerAuthSubmit">Entrar</button>
+      <div class="drawer-hint" style="margin-top:14px;">
+        <span id="customerAuthToggleText">Ainda não tem conta?</span>
+        <button type="button" id="customerAuthToggle" style="background:none;border:none;color:var(--teal);cursor:pointer;font-size:inherit;padding:0;">Criar conta</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="loginOverlay">
+  <div class="modal">
+    <div class="modal-head"><h3>Configuração</h3><button class="close-btn" id="closeLogin" aria-label="Fechar">×</button></div>
+    <div class="modal-body">
+      <div class="modal-error" id="loginError">E-mail ou senha incorretos.</div>
+      <div class="field"><label for="loginEmail">E-mail de administrador</label><input type="email" id="loginEmail" autocomplete="username"></div>
+      <div class="field"><label for="loginPass">Senha</label><input type="password" id="loginPass" autocomplete="current-password"></div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" id="loginSubmit">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="adminOverlay">
+  <div class="modal modal-wide">
+    <div class="modal-head"><h3>Painel de configuração</h3><div style="display:flex;align-items:center;gap:10px;"><button class="btn btn-ghost" id="adminLogout" style="padding:7px 12px;font-size:12.5px;">Sair</button><button class="close-btn" id="closeAdmin" aria-label="Fechar">×</button></div></div>
+    <div class="modal-body">
+      <div class="admin-note">Este painel edita os dados salvos neste navegador (armazenamento local). Ele é uma trava de conveniência para evitar que qualquer visitante mexa no site sem querer — não é uma segurança de servidor real, já que este é um arquivo estático sem backend. Não reutilize aqui uma senha importante sua.</div>
+
+      <div class="admin-section">
+        <h4>Chave Pix e QR Code</h4>
+        <div class="field-row">
+          <div class="field"><label>Chave Pix</label><input type="text" id="adminPixKey"></div>
+          <div class="field"><label>Nome do recebedor (aparece opcionalmente)</label><input type="text" id="adminPixName"></div>
+        </div>
+        <div class="admin-note">O QR Code é gerado automaticamente a partir da chave Pix acima (padrão "copia e cola" simplificado). Se seu banco pedir um QR Pix oficial gerado pelo próprio app do banco, gere lá e envie o comprovante normalmente — o QR aqui serve para o cliente escanear e cair na chave.</div>
+      </div>
+
+      <div class="admin-section">
+        <h4>Frutas Físicas Permanentes</h4>
+        <table class="admin-table" id="tableFrutas">
+          <thead><tr><th class="col-check">Est.</th><th>Nome</th><th>Raridade</th><th>Preço (R$)</th><th>Foto</th><th class="col-actions"></th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <button class="admin-add" data-cat="fruta-fisica">+ adicionar fruta</button>
+      </div>
+
+      <div class="admin-section">
+        <h4>Robux</h4>
+        <table class="admin-table" id="tableRobux">
+          <thead><tr><th class="col-check">Est.</th><th>Nome</th><th>Raridade</th><th>Preço (R$)</th><th>Foto</th><th class="col-actions"></th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <button class="admin-add" data-cat="robux">+ adicionar pacote de Robux</button>
+      </div>
+
+      <div class="admin-section">
+        <h4>Gamepasses</h4>
+        <table class="admin-table" id="tableGamepass">
+          <thead><tr><th class="col-check">Est.</th><th>Nome</th><th>Raridade</th><th>Preço (R$)</th><th>Foto</th><th class="col-actions"></th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <button class="admin-add" data-cat="gamepass">+ adicionar gamepass</button>
+      </div>
+
+      <div class="admin-section">
+        <h4>Contato</h4>
+        <div class="field-row">
+          <div class="field"><label>WhatsApp (só números, com DDI+DDD)</label><input type="text" id="adminWhats"></div>
+          <div class="field"><label>Link do Discord</label><input type="text" id="adminDiscord"></div>
+        </div>
+      </div>
+
+      <div class="admin-section">
+        <h4>Moderar avaliações</h4>
+        <table class="admin-table" id="tableReviews">
+          <thead><tr><th>Nome</th><th>Nota</th><th>Comentário</th><th>Data</th><th class="col-actions"></th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div class="admin-note" id="reviewsAdminEmpty" style="display:none;">Nenhuma avaliação publicada ainda.</div>
+      </div>
+
+      <div class="admin-section">
+        <h4>Trocar senha de administrador</h4>
+        <div class="field-row">
+          <div class="field"><label>Nova senha</label><input type="password" id="adminNewPass"></div>
+          <div class="field"><label>Confirmar nova senha</label><input type="password" id="adminNewPass2"></div>
+        </div>
+      </div>
+
+      <div class="admin-section">
+        <h4>Backup e segurança dos dados</h4>
+        <div class="admin-note">Toda vez que você aperta "Salvar tudo" ou "Restaurar padrão", o site guarda automaticamente uma cópia de como tudo estava <em>antes</em> — dá pra desfazer a última ação a qualquer momento com o botão abaixo. Também recomendo baixar um backup em arquivo de vez em quando, principalmente depois de cadastrar várias frutas/fotos.</div>
+        <div class="field-row">
+          <button class="btn btn-ghost" id="adminUndo" style="flex:1;justify-content:center;" disabled>↺ Desfazer última alteração</button>
+          <button class="btn btn-ghost" id="adminExport" style="flex:1;justify-content:center;">⭳ Baixar backup (.json)</button>
+        </div>
+        <div class="field-row" style="margin-top:10px;">
+          <div class="field" style="flex:1;">
+            <label for="adminImportFile">Restaurar a partir de um backup (.json)</label>
+            <input type="file" id="adminImportFile" accept="application/json">
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-save-bar">
+        <button class="btn btn-ghost" id="adminReset">Restaurar padrão de fábrica</button>
+        <button class="btn btn-primary" id="adminSave">Salvar tudo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var SUPABASE_URL = "https://gcbqabclpyyhedpnmjte.supabase.co";
+var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdjYnFhYmNscHl5aGVkcG5tanRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5NjU4MzgsImV4cCI6MjEwNTU0MTgzOH0.dwFNtoLT9klXQEuN6Sh0YKDt996g6w9XKnsUooSGof4";
+var sb = null;
+try{
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true }
+  });
+}catch(e){
+  console.error("Não foi possível iniciar o Supabase:", e);
+}
+
+var STORAGE_KEY = "caisdasfrutas_v2";
+var BACKUP_KEY = STORAGE_KEY + "_undo";
+var CACHE_KEY = STORAGE_KEY + "_cache";
+
+var DEFAULT_ITEMS = [
+  { id:"fr1", nome:"Dragão", categoria:"fruta-fisica", raridade:"mythical", preco:180, estoque:true },
+  { id:"fr2", nome:"Kitsune", categoria:"fruta-fisica", raridade:"mythical", preco:190, estoque:true },
+  { id:"fr3", nome:"Leopard", categoria:"fruta-fisica", raridade:"mythical", preco:150, estoque:true },
+  { id:"fr4", nome:"Venom", categoria:"fruta-fisica", raridade:"mythical", preco:170, estoque:false },
+  { id:"fr5", nome:"Gas", categoria:"fruta-fisica", raridade:"mythical", preco:175, estoque:false },
+  { id:"fr6", nome:"Buddha", categoria:"fruta-fisica", raridade:"mythical", preco:160, estoque:false },
+  { id:"fr7", nome:"Control", categoria:"fruta-fisica", raridade:"mythical", preco:165, estoque:false },
+  { id:"fr8", nome:"T-Rex", categoria:"fruta-fisica", raridade:"legendary", preco:95, estoque:false },
+  { id:"fr9", nome:"Shadow", categoria:"fruta-fisica", raridade:"legendary", preco:90, estoque:false },
+  { id:"fr10", nome:"Spirit", categoria:"fruta-fisica", raridade:"legendary", preco:100, estoque:false },
+  { id:"fr11", nome:"Gravity", categoria:"fruta-fisica", raridade:"legendary", preco:105, estoque:false },
+  { id:"fr12", nome:"Yeti", categoria:"fruta-fisica", raridade:"legendary", preco:60, estoque:true },
+  { id:"fr13", nome:"Mamute", categoria:"fruta-fisica", raridade:"legendary", preco:65, estoque:false },
+  { id:"fr14", nome:"Pain", categoria:"fruta-fisica", raridade:"legendary", preco:70, estoque:false },
+  { id:"fr15", nome:"Dark", categoria:"fruta-fisica", raridade:"rare", preco:35, estoque:false },
+  { id:"fr16", nome:"Portal", categoria:"fruta-fisica", raridade:"rare", preco:35, estoque:false },
+  { id:"fr17", nome:"Lightning", categoria:"fruta-fisica", raridade:"rare", preco:30, estoque:false },
+  { id:"fr18", nome:"Rubber", categoria:"fruta-fisica", raridade:"rare", preco:25, estoque:false },
+  { id:"fr19", nome:"Magma", categoria:"fruta-fisica", raridade:"rare", preco:28, estoque:false },
+  { id:"fr20", nome:"Quake", categoria:"fruta-fisica", raridade:"rare", preco:32, estoque:false },
+  { id:"fr21", nome:"Ice", categoria:"fruta-fisica", raridade:"uncommon", preco:15, estoque:false },
+  { id:"fr22", nome:"Smoke", categoria:"fruta-fisica", raridade:"uncommon", preco:12, estoque:false },
+  { id:"fr23", nome:"Bomb", categoria:"fruta-fisica", raridade:"uncommon", preco:10, estoque:false },
+  { id:"fr24", nome:"Spike", categoria:"fruta-fisica", raridade:"uncommon", preco:10, estoque:false },
+  { id:"fr25", nome:"Spring", categoria:"fruta-fisica", raridade:"uncommon", preco:14, estoque:true },
+  { id:"fr26", nome:"Rocket", categoria:"fruta-fisica", raridade:"uncommon", preco:13, estoque:true },
+  { id:"rb1", nome:"400 Robux", categoria:"robux", raridade:"uncommon", preco:20, estoque:true },
+  { id:"rb2", nome:"800 Robux", categoria:"robux", raridade:"uncommon", preco:38, estoque:true },
+  { id:"rb3", nome:"1.700 Robux", categoria:"robux", raridade:"rare", preco:75, estoque:true },
+  { id:"rb4", nome:"4.500 Robux", categoria:"robux", raridade:"legendary", preco:190, estoque:true },
+  { id:"gp1", nome:"2x Drops de Chefe", categoria:"gamepass", raridade:"uncommon", preco:25, estoque:true },
+  { id:"gp2", nome:"Barcos Rápidos", categoria:"gamepass", raridade:"uncommon", preco:25, estoque:true },
+  { id:"gp3", nome:"2x Dinheiro", categoria:"gamepass", raridade:"rare", preco:32, estoque:true },
+  { id:"gp4", nome:"2x Maestria", categoria:"gamepass", raridade:"rare", preco:32, estoque:true },
+  { id:"gp5", nome:"Dark Blade", categoria:"gamepass", raridade:"legendary", preco:85, estoque:true },
+  { id:"gp6", nome:"Fruit Notifier", categoria:"gamepass", raridade:"legendary", preco:180, estoque:true },
+  { id:"gp7", nome:"Respawnar bosses", categoria:"gamepass", raridade:"uncommon", preco:8, estoque:true },
+  { id:"gp8", nome:"Refund Stats", categoria:"gamepass", raridade:"uncommon", preco:10, estoque:true },
+  { id:"gp9", nome:"Alterar raça", categoria:"gamepass", raridade:"rare", preco:12, estoque:true },
+  { id:"gp10", nome:"+1 Armazenamento de frutas", categoria:"gamepass", raridade:"rare", preco:28, estoque:true }
+];
+var DEFAULT_SETTINGS = { pixKey:"15930921644", pixName:"Capa das Frutas", whats:"", discord:"https://discord.gg/tFMqdUH62" };
+
+var MAX_IMAGE_BYTES = 3 * 1024 * 1024;
+var REVIEW_COOLDOWN_MS = 60 * 1000;
+
+var RARIDADE_LABEL = { mythical:"mítica", legendary:"lendária", rare:"rara", uncommon:"incomum" };
+var CATEGORIA_LABEL = { "fruta-fisica":"fruta física perm.", "robux":"robux", "gamepass":"gamepass" };
+var CATEGORIA_ICON = { "fruta-fisica":"🍈", "robux":"🪙", "gamepass":"🎟️" };
+
+var state = { catFilter:"todos", rarFilter:"todos", busca:"", carrinho:{}, favoritos:[] };
+var data = { pixKey:DEFAULT_SETTINGS.pixKey, pixName:DEFAULT_SETTINGS.pixName, whats:DEFAULT_SETTINGS.whats, discord:DEFAULT_SETTINGS.discord, items:[], reviews:[] };
+var currentSession = null;
+var dataReady = false;
+
+try{
+  var savedCart = localStorage.getItem(STORAGE_KEY + "_cart");
+  if(savedCart) state.carrinho = JSON.parse(savedCart) || {};
+}catch(e){}
+try{
+  var savedFavs = localStorage.getItem(STORAGE_KEY + "_favs");
+  if(savedFavs) state.favoritos = JSON.parse(savedFavs) || [];
+}catch(e){}
+
+function persistCarrinho(){
+  try{ localStorage.setItem(STORAGE_KEY + "_cart", JSON.stringify(state.carrinho)); }catch(e){}
+}
+function persistFavoritos(){
+  try{ localStorage.setItem(STORAGE_KEY + "_favs", JSON.stringify(state.favoritos)); }catch(e){}
+}
+function isFavorito(id){ return state.favoritos.indexOf(id) !== -1; }
+function toggleFavorito(id){
+  var idx = state.favoritos.indexOf(id);
+  if(idx === -1){ state.favoritos.push(id); showToast("Adicionado aos favoritos."); }
+  else{ state.favoritos.splice(idx, 1); showToast("Removido dos favoritos."); }
+  persistFavoritos();
+  renderGrid();
+}
+
+function escapeHtml(str){
+  return String(str == null ? "" : str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function formatarPreco(v){
+  var n = Number(v);
+  if(!isFinite(n) || n < 0) n = 0;
+  return "R$ " + n.toLocaleString("pt-BR", { minimumFractionDigits:0, maximumFractionDigits:2 });
+}
+
+function showToast(msg){
+  var t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._hideTimer);
+  t._hideTimer = setTimeout(function(){ t.classList.remove("show"); }, 2600);
+}
+
+function rowToItem(row){
+  return { id:row.id, nome:row.nome, categoria:row.categoria, raridade:row.raridade, preco:Number(row.preco), estoque:!!row.estoque, imagem:row.imagem_url || null };
+}
+function rowToReview(row){
+  return { id:row.id, nome:row.nome, nota:Number(row.nota), texto:row.texto, data:row.data };
+}
+
+function snapshotBackup(){
+  try{
+    localStorage.setItem(BACKUP_KEY, JSON.stringify({ pixKey:data.pixKey, pixName:data.pixName, whats:data.whats, discord:data.discord, items:data.items }));
+    var undoBtn = document.getElementById("adminUndo");
+    if(undoBtn) undoBtn.disabled = false;
+  }catch(e){}
+}
+function hasBackup(){
+  try{ return !!localStorage.getItem(BACKUP_KEY); }catch(e){ return false; }
+}
+
+async function fetchAll(){
+  if(!sb){
+    showToast("Não foi possível conectar ao banco de dados.");
+    return false;
+  }
+  try{
+    var itemsRes = await sb.from("items").select("*").order("criado_em", { ascending:true });
+    if(itemsRes.error) throw itemsRes.error;
+    var settingsRes = await sb.from("settings").select("*").eq("id", true).single();
+    if(settingsRes.error) throw settingsRes.error;
+    var reviewsRes = await sb.from("reviews").select("*").order("data", { ascending:false });
+    if(reviewsRes.error) throw reviewsRes.error;
+
+    data.items = itemsRes.data.map(rowToItem);
+    data.reviews = reviewsRes.data.map(rowToReview);
+    data.pixKey = settingsRes.data.pix_key;
+    data.pixName = settingsRes.data.pix_name;
+    data.whats = settingsRes.data.whatsapp || "";
+    data.discord = settingsRes.data.discord || "";
+
+    try{ localStorage.setItem(CACHE_KEY, JSON.stringify(data)); }catch(e){}
+    dataReady = true;
+    return true;
+  }catch(err){
+    console.error("Erro ao carregar dados do Supabase:", err);
+    var cached = null;
+    try{ cached = JSON.parse(localStorage.getItem(CACHE_KEY)); }catch(e){}
+    if(cached && Array.isArray(cached.items)){
+      data.items = cached.items;
+      data.reviews = cached.reviews || [];
+      data.pixKey = cached.pixKey;
+      data.pixName = cached.pixName;
+      data.whats = cached.whats;
+      data.discord = cached.discord;
+      dataReady = true;
+      showToast("Sem conexão com o banco agora — mostrando a última versão salva neste navegador.");
+    } else {
+      showToast("Não foi possível carregar o catálogo. Verifique sua internet e recarregue a página.");
+    }
+    return false;
+  }
+}
+
+function refreshAllAfterDataChange(){
+  renderGrid();
+  renderHero();
+  atualizarCarrinho();
+  renderReviews();
+  if(document.getElementById("adminOverlay").classList.contains("open")){
+    renderAdminTables();
+    renderAdminReviews();
+    document.getElementById("adminPixKey").value = data.pixKey;
+    document.getElementById("adminPixName").value = data.pixName;
+    document.getElementById("adminWhats").value = data.whats;
+    document.getElementById("adminDiscord").value = data.discord;
+  }
+}
+
+function itensFiltrados(){
+  var termo = state.busca.trim().toLowerCase();
+  return data.items.filter(function(item){
+    var passaCat = state.catFilter === "todos" || (state.catFilter === "favoritos" ? isFavorito(item.id) : item.categoria === state.catFilter);
+    var passaRar = state.rarFilter === "todos" || item.raridade === state.rarFilter;
+    var passaBusca = termo === "" || item.nome.toLowerCase().indexOf(termo) !== -1;
+    return passaCat && passaRar && passaBusca;
+  });
+}
+
+function renderGrid(){
+  var grid = document.getElementById("grid");
+  if(!dataReady){
+    grid.innerHTML = '<div class="badge-empty">Carregando catálogo…</div>';
+    return;
+  }
+  var lista = itensFiltrados();
+
+  if(lista.length === 0){
+    var msg = state.catFilter === "favoritos"
+      ? "Você ainda não favoritou nenhum item. Toque no ♡ de um card para salvar aqui."
+      : "Nenhum item encontrado com esse filtro.";
+    grid.innerHTML = '<div class="badge-empty">' + msg + '</div>';
+    return;
+  }
+
+  grid.innerHTML = lista.map(function(item){
+    var tagClass = "tag-" + item.raridade;
+    var iconHtml = item.imagem
+      ? '<img src="' + item.imagem + '" alt="" loading="lazy" onerror="this.replaceWith(document.createTextNode(\'' + CATEGORIA_ICON[item.categoria] + '\'))">'
+      : CATEGORIA_ICON[item.categoria];
+    var favAtivo = isFavorito(item.id);
+    return '' +
+      '<div class="card">' +
+        '<div class="card-top">' +
+          '<div class="card-icon">' + iconHtml + '</div>' +
+          '<div style="display:flex;align-items:center;gap:6px;">' +
+            '<span class="tag ' + tagClass + '">' + RARIDADE_LABEL[item.raridade] + '</span>' +
+            '<button class="fav-btn' + (favAtivo ? ' active' : '') + '" data-fav="' + item.id + '" aria-label="' + (favAtivo ? "Remover dos favoritos" : "Adicionar aos favoritos") + '" aria-pressed="' + favAtivo + '">' + (favAtivo ? "♥" : "♡") + '</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="card-name">' + escapeHtml(item.nome) + '</div>' +
+        '<div class="card-type mono">' + CATEGORIA_LABEL[item.categoria] + (item.estoque ? "" : " · esgotado") + '</div>' +
+        '<div class="card-bottom">' +
+          '<div class="card-price">' + formatarPreco(item.preco) + '</div>' +
+          '<button class="add-btn" data-id="' + item.id + '" aria-label="Adicionar ' + escapeHtml(item.nome) + ' à encomenda" ' + (item.estoque ? "" : "disabled") + '>+</button>' +
+        '</div>' +
+      '</div>';
+  }).join("");
+
+  grid.querySelectorAll(".add-btn").forEach(function(btn){
+    btn.addEventListener("click", function(){ adicionarAoCarrinho(btn.getAttribute("data-id"), btn); });
+  });
+  grid.querySelectorAll(".fav-btn").forEach(function(btn){
+    btn.addEventListener("click", function(){ toggleFavorito(btn.getAttribute("data-fav")); });
+  });
+
+  var cards = grid.querySelectorAll(".card");
+  if("IntersectionObserver" in window){
+    var obs = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          entry.target.classList.add("in");
+          obs.unobserve(entry.target);
+        }
+      });
+    }, { threshold:.1 });
+    cards.forEach(function(card, i){
+      card.style.animationDelay = (i % 8) * 0.04 + "s";
+      obs.observe(card);
+    });
+  } else {
+    cards.forEach(function(card){ card.classList.add("in"); });
+  }
+}
+
+function renderHero(){
+  var destaque = data.items.filter(function(i){ return i.estoque; }).slice(0, 4);
+  document.getElementById("heroCount").textContent = destaque.length + " ITENS";
+  document.getElementById("heroList").innerHTML = destaque.map(function(item){
+    return '<div class="manifest-row"><span class="name">' + escapeHtml(item.nome) + '</span><span class="tag tag-' + item.raridade + '">' + RARIDADE_LABEL[item.raridade] + '</span></div>';
+  }).join("");
+}
+
+function adicionarAoCarrinho(id, sourceEl){
+  state.carrinho[id] = (state.carrinho[id] || 0) + 1;
+  atualizarCarrinho();
+  abrirCarrinho();
+  if(sourceEl) burstEffect(sourceEl);
+}
+function alterarQuantidade(id, delta){
+  if(!state.carrinho[id]) return;
+  state.carrinho[id] += delta;
+  if(state.carrinho[id] <= 0) delete state.carrinho[id];
+  atualizarCarrinho();
+}
+function removerItem(id){ delete state.carrinho[id]; atualizarCarrinho(); }
+
+function burstEffect(el){
+  var rect = el.getBoundingClientRect();
+  for(var i = 0; i < 6; i++){
+    var p = document.createElement("span");
+    p.className = "burst-particle";
+    p.style.left = (rect.left + rect.width / 2) + "px";
+    p.style.top = (rect.top + rect.height / 2) + "px";
+    var angle = (Math.PI * 2 * i) / 6;
+    p.style.setProperty("--dx", Math.cos(angle) * 34 + "px");
+    p.style.setProperty("--dy", Math.sin(angle) * 34 + "px");
+    document.body.appendChild(p);
+    p.addEventListener("animationend", function(){ this.remove(); });
+  }
+}
+
+function calcularTotal(){
+  var total = 0;
+  Object.keys(state.carrinho).forEach(function(id){
+    var item = data.items.find(function(i){ return i.id === id; });
+    if(item) total += item.preco * state.carrinho[id];
+  });
+  return total;
+}
+function contarItens(){
+  return Object.keys(state.carrinho).reduce(function(acc, id){ return acc + state.carrinho[id]; }, 0);
+}
+
+function atualizarCarrinho(){
+  persistCarrinho();
+  document.getElementById("cartCount").textContent = contarItens();
+  var container = document.getElementById("drawerItems");
+  var ids = Object.keys(state.carrinho);
+
+  if(ids.length === 0){
+    container.innerHTML = '<div class="drawer-empty">Sua encomenda está vazia.<br>Adicione itens do catálogo para começar.</div>';
+  } else {
+    container.innerHTML = ids.map(function(id){
+      var item = data.items.find(function(i){ return i.id === id; });
+      if(!item) return "";
+      var qtd = state.carrinho[id];
+      return '' +
+        '<div class="drawer-item">' +
+          '<div><div class="di-name">' + escapeHtml(item.nome) + '</div><div class="di-price">' + formatarPreco(item.preco) + ' cada</div></div>' +
+          '<div class="di-controls">' +
+            '<button class="qty-btn" data-action="dec" data-id="' + id + '">−</button>' +
+            '<span class="qty-val">' + qtd + '</span>' +
+            '<button class="qty-btn" data-action="inc" data-id="' + id + '">+</button>' +
+            '<button class="di-remove" data-action="rem" data-id="' + id + '">×</button>' +
+          '</div>' +
+        '</div>';
+    }).join("");
+
+    container.querySelectorAll("[data-action]").forEach(function(btn){
+      var id = btn.getAttribute("data-id");
+      var acao = btn.getAttribute("data-action");
+      btn.addEventListener("click", function(){
+        if(acao === "inc") alterarQuantidade(id, 1);
+        if(acao === "dec") alterarQuantidade(id, -1);
+        if(acao === "rem") removerItem(id);
+      });
+    });
+  }
+
+  var total = calcularTotal();
+  document.getElementById("totalValue").textContent = formatarPreco(total);
+  document.getElementById("checkoutBtn").disabled = ids.length === 0;
+}
+
+function montarMensagemComprovante(){
+  var linhas = ["Olá! Acabei de pagar via Pix a encomenda:", ""];
+  Object.keys(state.carrinho).forEach(function(id){
+    var item = data.items.find(function(i){ return i.id === id; });
+    if(!item) return;
+    var qtd = state.carrinho[id];
+    linhas.push("- " + item.nome + " x" + qtd + " — " + formatarPreco(item.preco * qtd));
+  });
+  linhas.push("");
+  linhas.push("Total pago: " + formatarPreco(calcularTotal()));
+  linhas.push("Segue o comprovante em anexo.");
+  return linhas.join("\n");
+}
+
+function abrirCarrinho(){ document.getElementById("drawer").classList.add("open"); document.getElementById("overlay").classList.add("open"); }
+function fecharCarrinho(){ document.getElementById("drawer").classList.remove("open"); document.getElementById("overlay").classList.remove("open"); }
+
+function abrirPix(){
+  var total = calcularTotal();
+  document.getElementById("pixTotal").textContent = formatarPreco(total);
+  document.getElementById("pixKeyInput").value = data.pixKey;
+
+  var qrHolder = document.getElementById("qrcodeCanvas");
+  qrHolder.innerHTML = "";
+  var payload = pixPayload(data.pixKey, data.pixName || "Capa das Frutas", total);
+  try{
+    new QRCode(qrHolder, { text: payload, width:200, height:200, colorDark:"#000000", colorLight:"#ffffff" });
+  }catch(e){
+    qrHolder.innerHTML = '<div style="width:200px;height:200px;display:flex;align-items:center;justify-content:center;color:#111;font-size:12px;padding:10px;">Não foi possível gerar o QR agora. Use a chave copiável abaixo.</div>';
+  }
+
+  document.getElementById("pixOverlay").classList.add("open");
+}
+function fecharPix(){ document.getElementById("pixOverlay").classList.remove("open"); }
+
+function pixPayload(chave, nome, valor){
+  function emv(id, value){
+    var len = String(value.length).padStart(2, "0");
+    return id + len + value;
+  }
+  var merchantAccount = emv("00", "br.gov.bcb.pix") + emv("01", chave);
+  var payloadSemCrc =
+    emv("00", "01") +
+    emv("26", merchantAccount) +
+    emv("52", "0000") +
+    emv("53", "986") +
+    (valor > 0 ? emv("54", valor.toFixed(2)) : "") +
+    emv("58", "BR") +
+    emv("59", (nome || "CAPA DAS FRUTAS").substring(0,25).toUpperCase()) +
+    emv("60", "SAO PAULO") +
+    emv("62", emv("05", "***")) +
+    "6304";
+  return payloadSemCrc + crc16(payloadSemCrc);
+}
+function crc16(str){
+  var polinomio = 0x1021, resultado = 0xFFFF;
+  for(var i = 0; i < str.length; i++){
+    resultado ^= (str.charCodeAt(i) << 8);
+    for(var j = 0; j < 8; j++){
+      resultado = (resultado & 0x8000) ? ((resultado << 1) ^ polinomio) : (resultado << 1);
+      resultado &= 0xFFFF;
+    }
+  }
+  return resultado.toString(16).toUpperCase().padStart(4, "0");
+}
+
+document.getElementById("openCart").addEventListener("click", abrirCarrinho);
+document.getElementById("closeCart").addEventListener("click", fecharCarrinho);
+document.getElementById("overlay").addEventListener("click", fecharCarrinho);
+
+document.getElementById("checkoutBtn").addEventListener("click", function(){
+  fecharCarrinho();
+  abrirPix();
+});
+document.getElementById("copyOrderBtn").addEventListener("click", function(){
+  var ids = Object.keys(state.carrinho);
+  if(ids.length === 0){
+    showToast("Sua encomenda está vazia.");
+    return;
+  }
+  var texto = montarMensagemComprovante().replace("Olá! Acabei de pagar via Pix a encomenda:", "Resumo da encomenda:").replace("\nSegue o comprovante em anexo.", "");
+  function fallbackCopy(txt){
+    var ta = document.createElement("textarea");
+    ta.value = txt;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand("copy"); }catch(e){}
+    ta.remove();
+  }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(texto).then(function(){
+      showToast("Resumo copiado.");
+    }).catch(function(){
+      fallbackCopy(texto);
+      showToast("Resumo copiado.");
+    });
+  } else {
+    fallbackCopy(texto);
+    showToast("Resumo copiado.");
+  }
+});
+document.getElementById("closePix").addEventListener("click", fecharPix);
+document.getElementById("pixOverlay").addEventListener("click", function(e){ if(e.target.id === "pixOverlay") fecharPix(); });
+
+document.getElementById("copyPixBtn").addEventListener("click", function(){
+  var input = document.getElementById("pixKeyInput");
+  input.select();
+  input.setSelectionRange(0, 999);
+  try{
+    navigator.clipboard.writeText(input.value);
+    showToast("Chave Pix copiada.");
+  }catch(e){
+    document.execCommand("copy");
+    showToast("Chave Pix copiada.");
+  }
+});
+
+document.getElementById("sendProofBtn").addEventListener("click", function(){
+  var msg = encodeURIComponent(montarMensagemComprovante());
+  window.open("https://wa.me/" + data.whats + "?text=" + msg, "_blank");
+});
+
+document.getElementById("catTabs").querySelectorAll(".cat-tab").forEach(function(tab){
+  tab.addEventListener("click", function(){
+    document.getElementById("catTabs").querySelectorAll(".cat-tab").forEach(function(t){ t.classList.remove("active"); });
+    tab.classList.add("active");
+    state.catFilter = tab.getAttribute("data-cat");
+    renderGrid();
+  });
+});
+document.getElementById("filterbar").querySelectorAll(".chip").forEach(function(chip){
+  chip.addEventListener("click", function(){
+    document.getElementById("filterbar").querySelectorAll(".chip").forEach(function(c){ c.classList.remove("active"); });
+    chip.classList.add("active");
+    state.rarFilter = chip.getAttribute("data-filter");
+    renderGrid();
+  });
+});
+var searchDebounceTimer = null;
+document.getElementById("searchInput").addEventListener("input", function(e){
+  var val = e.target.value;
+  clearTimeout(searchDebounceTimer);
+  searchDebounceTimer = setTimeout(function(){
+    state.busca = val;
+    renderGrid();
+  }, 180);
+});
+
+async function isAdminUser(session){
+  if(!sb || !session || !session.user) return { isAdmin:false, erro:null };
+  var result = await sb.from("admins").select("user_id").eq("user_id", session.user.id).maybeSingle();
+  if(result.error){
+    console.error("Erro ao checar permissão de admin:", result.error);
+    var msg = /relation .* does not exist/i.test(result.error.message || "")
+      ? "A tabela \"admins\" ainda não existe no banco — rode o supabase-fix-admins.sql no SQL Editor."
+      : "Não foi possível checar sua permissão agora: " + result.error.message;
+    return { isAdmin:false, erro:msg };
+  }
+  return { isAdmin:!!result.data, erro:null };
+}
+
+document.getElementById("openAdmin").addEventListener("click", async function(){
+  if(!sb){ showToast("Conexão com o banco indisponível agora."); return; }
+  var sessionResult = await sb.auth.getSession();
+  currentSession = sessionResult.data ? sessionResult.data.session : null;
+  if(currentSession){
+    var checagem = await isAdminUser(currentSession);
+    if(checagem.isAdmin){
+      abrirAdmin();
+    } else if(checagem.erro){
+      showToast(checagem.erro);
+    } else {
+      showToast("Essa conta não tem acesso ao painel de configuração. Saia (botão \"Entrar\" no topo) e entre com a conta de administrador.");
+    }
+    return;
+  }
+  document.getElementById("loginEmail").value = "";
+  document.getElementById("loginPass").value = "";
+  document.getElementById("loginError").classList.remove("show");
+  document.getElementById("loginOverlay").classList.add("open");
+});
+document.getElementById("closeLogin").addEventListener("click", function(){ document.getElementById("loginOverlay").classList.remove("open"); });
+document.getElementById("loginOverlay").addEventListener("click", function(e){ if(e.target.id === "loginOverlay") document.getElementById("loginOverlay").classList.remove("open"); });
+
+document.getElementById("loginSubmit").addEventListener("click", tentarLogin);
+document.getElementById("loginPass").addEventListener("keydown", function(e){ if(e.key === "Enter") tentarLogin(); });
+document.getElementById("loginEmail").addEventListener("keydown", function(e){ if(e.key === "Enter") tentarLogin(); });
+
+async function tentarLogin(){
+  if(!sb){ showToast("Conexão com o banco indisponível agora."); return; }
+  var email = document.getElementById("loginEmail").value.trim();
+  var senha = document.getElementById("loginPass").value;
+  var errBox = document.getElementById("loginError");
+  var btn = document.getElementById("loginSubmit");
+  if(!email || !senha){
+    errBox.textContent = "Preencha e-mail e senha.";
+    errBox.classList.add("show");
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = "Entrando…";
+  var result = await sb.auth.signInWithPassword({ email:email, password:senha });
+  btn.disabled = false;
+  btn.textContent = "Entrar";
+  if(result.error){
+    errBox.textContent = "E-mail ou senha incorretos.";
+    errBox.classList.add("show");
+    return;
+  }
+  currentSession = result.data.session;
+  var checagem = await isAdminUser(currentSession);
+  document.getElementById("loginOverlay").classList.remove("open");
+  syncAuthButton();
+  if(checagem.isAdmin){
+    abrirAdmin();
+  } else if(checagem.erro){
+    showToast(checagem.erro);
+  } else {
+    showToast("Essa conta não tem acesso ao painel de configuração.");
+  }
+}
+
+document.getElementById("adminLogout").addEventListener("click", async function(){
+  if(sb) await sb.auth.signOut();
+  currentSession = null;
+  document.getElementById("adminOverlay").classList.remove("open");
+  syncAuthButton();
+  showToast("Sessão encerrada.");
+});
+
+function syncAuthButton(){
+  var btn = document.getElementById("customerAuthBtn");
+  if(!btn) return;
+  if(currentSession && currentSession.user){
+    var nome = (currentSession.user.user_metadata && currentSession.user.user_metadata.nome) || currentSession.user.email.split("@")[0];
+    btn.textContent = "Sair (" + nome.substring(0, 14) + ")";
+  } else {
+    btn.textContent = "Entrar";
+  }
+}
+
+var customerAuthMode = "login";
+
+document.getElementById("customerAuthBtn").addEventListener("click", async function(){
+  if(!sb){ showToast("Conexão com o banco indisponível agora."); return; }
+  if(currentSession){
+    await sb.auth.signOut();
+    currentSession = null;
+    syncAuthButton();
+    showToast("Você saiu da sua conta.");
+    return;
+  }
+  customerAuthMode = "login";
+  atualizarModoCustomerAuth();
+  document.getElementById("customerEmail").value = "";
+  document.getElementById("customerPass").value = "";
+  document.getElementById("customerNome").value = "";
+  document.getElementById("customerAuthError").classList.remove("show");
+  document.getElementById("customerAuthOverlay").classList.add("open");
+});
+document.getElementById("closeCustomerAuth").addEventListener("click", function(){ document.getElementById("customerAuthOverlay").classList.remove("open"); });
+document.getElementById("customerAuthOverlay").addEventListener("click", function(e){ if(e.target.id === "customerAuthOverlay") document.getElementById("customerAuthOverlay").classList.remove("open"); });
+
+function atualizarModoCustomerAuth(){
+  var isCadastro = customerAuthMode === "cadastro";
+  document.getElementById("customerAuthTitle").textContent = isCadastro ? "Criar conta" : "Entrar na sua conta";
+  document.getElementById("customerNomeField").style.display = isCadastro ? "block" : "none";
+  document.getElementById("customerAuthSubmit").textContent = isCadastro ? "Criar conta" : "Entrar";
+  document.getElementById("customerAuthToggleText").textContent = isCadastro ? "Já tem conta?" : "Ainda não tem conta?";
+  document.getElementById("customerAuthToggle").textContent = isCadastro ? "Entrar" : "Criar conta";
+  document.getElementById("customerAuthError").classList.remove("show");
+}
+document.getElementById("customerAuthToggle").addEventListener("click", function(){
+  customerAuthMode = customerAuthMode === "login" ? "cadastro" : "login";
+  atualizarModoCustomerAuth();
+});
+
+document.getElementById("customerAuthSubmit").addEventListener("click", async function(){
+  if(!sb){ showToast("Conexão com o banco indisponível agora."); return; }
+  var email = document.getElementById("customerEmail").value.trim();
+  var senha = document.getElementById("customerPass").value;
+  var errBox = document.getElementById("customerAuthError");
+  var btn = this;
+
+  if(!email || !senha || senha.length < 6){
+    errBox.textContent = "Preencha um e-mail válido e uma senha com pelo menos 6 caracteres.";
+    errBox.classList.add("show");
+    return;
+  }
+
+  btn.disabled = true;
+
+  if(customerAuthMode === "cadastro"){
+    var nome = document.getElementById("customerNome").value.trim();
+    if(!nome){
+      errBox.textContent = "Preencha seu nome.";
+      errBox.classList.add("show");
+      btn.disabled = false;
+      return;
+    }
+    btn.textContent = "Criando conta…";
+    var signUpResult = await sb.auth.signUp({ email:email, password:senha, options:{ data:{ nome:nome } } });
+    btn.disabled = false;
+    btn.textContent = "Criar conta";
+    if(signUpResult.error){
+      errBox.textContent = signUpResult.error.message.indexOf("already") !== -1
+        ? "Esse e-mail já tem conta. Tente entrar em vez de criar uma nova."
+        : "Não foi possível criar a conta: " + signUpResult.error.message;
+      errBox.classList.add("show");
+      return;
+    }
+    currentSession = signUpResult.data.session;
+    if(!currentSession){
+      showToast("Conta criada. Confirme seu e-mail (se pedido) e depois entre normalmente.");
+      document.getElementById("customerAuthOverlay").classList.remove("open");
+      return;
+    }
+  } else {
+    btn.textContent = "Entrando…";
+    var loginResult = await sb.auth.signInWithPassword({ email:email, password:senha });
+    btn.disabled = false;
+    btn.textContent = "Entrar";
+    if(loginResult.error){
+      errBox.textContent = "E-mail ou senha incorretos.";
+      errBox.classList.add("show");
+      return;
+    }
+    currentSession = loginResult.data.session;
+  }
+
+  document.getElementById("customerAuthOverlay").classList.remove("open");
+  syncAuthButton();
+  showToast("Login feito com sucesso.");
+});
+
+function abrirAdmin(){
+  document.getElementById("adminPixKey").value = data.pixKey;
+  document.getElementById("adminPixName").value = data.pixName;
+  document.getElementById("adminWhats").value = data.whats;
+  document.getElementById("adminDiscord").value = data.discord;
+  document.getElementById("adminNewPass").value = "";
+  document.getElementById("adminNewPass2").value = "";
+  renderAdminTables();
+  renderAdminReviews();
+  document.getElementById("adminUndo").disabled = !hasBackup();
+  document.getElementById("adminOverlay").classList.add("open");
+}
+document.getElementById("closeAdmin").addEventListener("click", function(){ document.getElementById("adminOverlay").classList.remove("open"); });
+
+function raridadeOptions(selected){
+  return Object.keys(RARIDADE_LABEL).map(function(r){
+    return '<option value="' + r + '"' + (r === selected ? " selected" : "") + '>' + RARIDADE_LABEL[r] + '</option>';
+  }).join("");
+}
+
+function tableIdForCat(cat){
+  if(cat === "fruta-fisica") return "tableFrutas";
+  if(cat === "robux") return "tableRobux";
+  return "tableGamepass";
+}
+
+function renderAdminTables(){
+  ["fruta-fisica","robux","gamepass"].forEach(function(cat){
+    var tbody = document.querySelector("#" + tableIdForCat(cat) + " tbody");
+    var itens = data.items.filter(function(i){ return i.categoria === cat; });
+    tbody.innerHTML = itens.map(function(item){
+      var thumb = item.imagem ? '<img src="' + item.imagem + '" style="width:26px;height:26px;object-fit:cover;border-radius:2px;vertical-align:middle;margin-right:6px;">' : "";
+      return '' +
+        '<tr data-id="' + item.id + '">' +
+          '<td class="col-check"><input type="checkbox" ' + (item.estoque ? "checked" : "") + ' data-field="estoque"></td>' +
+          '<td><input type="text" value="' + escapeHtml(item.nome) + '" data-field="nome"></td>' +
+          '<td><select data-field="raridade">' + raridadeOptions(item.raridade) + '</select></td>' +
+          '<td><input type="number" min="0" step="1" value="' + item.preco + '" data-field="preco"></td>' +
+          '<td>' + thumb + '<input type="file" accept="image/*" data-field="imagem" style="max-width:110px;"></td>' +
+          '<td class="col-actions"><button class="row-del" data-action="del">×</button></td>' +
+        '</tr>';
+    }).join("");
+
+    tbody.querySelectorAll("tr").forEach(function(row){
+      var id = row.getAttribute("data-id");
+      row.querySelectorAll("[data-field]").forEach(function(input){
+        input.addEventListener("change", async function(){
+          var item = data.items.find(function(i){ return i.id === id; });
+          if(!item) return;
+          var field = input.getAttribute("data-field");
+
+          if(field === "imagem"){
+            var file = input.files && input.files[0];
+            if(!file) return;
+            if(!/^image\//.test(file.type)){
+              showToast("Arquivo inválido: selecione uma imagem.");
+              input.value = "";
+              return;
+            }
+            if(file.size > MAX_IMAGE_BYTES){
+              showToast("Imagem muito grande (máx. 3MB).");
+              input.value = "";
+              return;
+            }
+            showToast("Enviando imagem…");
+            var url = await uploadImagemItem(id, file);
+            input.value = "";
+            if(url){
+              item.imagem = url;
+              renderAdminTables();
+              renderGrid();
+              renderHero();
+              showToast("Imagem atualizada.");
+            }
+            return;
+          }
+
+          var value = field === "estoque" ? input.checked : (field === "preco" ? (parseFloat(input.value) || 0) : input.value);
+          if(field === "nome" && !value.trim()){
+            showToast("O nome não pode ficar vazio.");
+            input.value = item.nome;
+            return;
+          }
+          var anterior = item[field];
+          item[field] = value;
+          var payload = {};
+          payload[field] = value;
+          var ok = await salvarCampoItem(id, payload);
+          if(ok){
+            showToast("Salvo.");
+            renderGrid();
+            renderHero();
+          } else {
+            item[field] = anterior;
+            input.value = field === "estoque" ? undefined : anterior;
+            if(field === "estoque") input.checked = anterior;
+            renderAdminTables();
+          }
+        });
+      });
+      row.querySelector("[data-action='del']").addEventListener("click", async function(){
+        var item = data.items.find(function(i){ return i.id === id; });
+        var ok = confirm('Excluir "' + (item ? item.nome : "este item") + '" do catálogo? Isso afeta o site pra todo mundo imediatamente.');
+        if(!ok) return;
+        var sucesso = await excluirItem(id);
+        if(sucesso){
+          data.items = data.items.filter(function(i){ return i.id !== id; });
+          renderAdminTables();
+          renderGrid();
+          renderHero();
+          showToast("Item excluído.");
+        }
+      });
+    });
+  });
+}
+
+async function salvarCampoItem(id, payload){
+  if(!sb) return false;
+  var result = await sb.from("items").update(payload).eq("id", id);
+  if(result.error){
+    showToast("Não foi possível salvar: " + result.error.message);
+    return false;
+  }
+  return true;
+}
+
+async function excluirItem(id){
+  if(!sb) return false;
+  var result = await sb.from("items").delete().eq("id", id);
+  if(result.error){
+    showToast("Não foi possível excluir: " + result.error.message);
+    return false;
+  }
+  return true;
+}
+
+async function uploadImagemItem(id, file){
+  if(!sb) return null;
+  var extMatch = /\.([a-zA-Z0-9]+)$/.exec(file.name || "");
+  var ext = extMatch ? extMatch[1].toLowerCase() : "jpg";
+  var path = id + "-" + Date.now() + "." + ext;
+  var upResult = await sb.storage.from("fotos").upload(path, file, { upsert:true, cacheControl:"3600" });
+  if(upResult.error){
+    showToast("Não foi possível enviar a imagem: " + upResult.error.message);
+    return null;
+  }
+  var urlResult = sb.storage.from("fotos").getPublicUrl(path);
+  var publicUrl = urlResult.data ? urlResult.data.publicUrl : null;
+  if(!publicUrl) return null;
+  var updResult = await sb.from("items").update({ imagem_url: publicUrl }).eq("id", id);
+  if(updResult.error){
+    showToast("Imagem enviada, mas não associada ao item: " + updResult.error.message);
+    return null;
+  }
+  return publicUrl;
+}
+
+function renderAdminReviews(){
+  var tbody = document.querySelector("#tableReviews tbody");
+  var emptyNote = document.getElementById("reviewsAdminEmpty");
+  var revs = data.reviews || [];
+  emptyNote.style.display = revs.length ? "none" : "block";
+  tbody.innerHTML = revs.map(function(r){
+    return '' +
+      '<tr data-id="' + r.id + '">' +
+        '<td>' + escapeHtml(r.nome) + '</td>' +
+        '<td>' + Number(r.nota || 0) + '★</td>' +
+        '<td>' + escapeHtml(r.texto) + '</td>' +
+        '<td>' + escapeHtml(r.data || "") + '</td>' +
+        '<td class="col-actions"><button class="row-del" data-action="del">×</button></td>' +
+      '</tr>';
+  }).join("");
+  tbody.querySelectorAll("[data-action='del']").forEach(function(btn){
+    btn.addEventListener("click", async function(){
+      var id = btn.closest("tr").getAttribute("data-id");
+      var ok = confirm("Excluir essa avaliação? Essa ação não pode ser desfeita.");
+      if(!ok) return;
+      if(!sb) return;
+      var result = await sb.from("reviews").delete().eq("id", id);
+      if(result.error){
+        showToast("Não foi possível excluir: " + result.error.message);
+        return;
+      }
+      data.reviews = data.reviews.filter(function(r){ return r.id !== id; });
+      renderAdminReviews();
+      renderReviews();
+      showToast("Avaliação excluída.");
+    });
+  });
+}
+
+document.querySelectorAll(".admin-add").forEach(function(btn){
+  btn.addEventListener("click", async function(){
+    if(!sb){ showToast("Conexão com o banco indisponível agora."); return; }
+    var cat = btn.getAttribute("data-cat");
+    var novoId = cat + "_" + Date.now();
+    var novo = { id:novoId, nome:"Novo item", categoria:cat, raridade:"uncommon", preco:0, estoque:true };
+    btn.disabled = true;
+    var result = await sb.from("items").insert(novo);
+    btn.disabled = false;
+    if(result.error){
+      showToast("Não foi possível criar o item: " + result.error.message);
+      return;
+    }
+    data.items.push(novo);
+    renderAdminTables();
+    renderGrid();
+    renderHero();
+  });
+});
+
+document.getElementById("adminReset").addEventListener("click", async function(){
+  var ok = confirm(
+    "Isso vai apagar TODOS os itens atuais do catálogo (no banco de dados, afeta todo mundo) e recolocar a lista padrão de fábrica, além de resetar a chave Pix e o Discord para o padrão.\n\n" +
+    "As avaliações dos clientes NÃO são apagadas por essa ação.\n\n" +
+    "Uma cópia do estado atual dos itens é salva neste navegador e pode ser desfeita com \"Desfazer última alteração\" logo em seguida (some se você recarregar a página antes de desfazer).\n\n" +
+    "Restaurar o padrão de fábrica agora?"
+  );
+  if(!ok || !sb) return;
+
+  snapshotBackup();
+  showToast("Restaurando catálogo padrão…");
+
+  var delResult = await sb.from("items").delete().neq("id", "__nenhum__");
+  if(delResult.error){
+    showToast("Erro ao limpar os itens: " + delResult.error.message);
+    return;
+  }
+  var insResult = await sb.from("items").insert(DEFAULT_ITEMS);
+  if(insResult.error){
+    showToast("Erro ao inserir os itens padrão: " + insResult.error.message);
+    return;
+  }
+  var setResult = await sb.from("settings").update({
+    pix_key: DEFAULT_SETTINGS.pixKey,
+    pix_name: DEFAULT_SETTINGS.pixName,
+    discord: DEFAULT_SETTINGS.discord
+  }).eq("id", true);
+  if(setResult.error){
+    showToast("Itens restaurados, mas não foi possível resetar as configurações: " + setResult.error.message);
+  }
+
+  await fetchAll();
+  refreshAllAfterDataChange();
+  showToast("Catálogo restaurado ao padrão. Dá pra desfazer no botão acima.");
+});
+
+document.getElementById("adminUndo").addEventListener("click", async function(){
+  var raw = null;
+  try{ raw = localStorage.getItem(BACKUP_KEY); }catch(e){}
+  if(!raw){ showToast("Não há nenhuma alteração para desfazer."); return; }
+  var snap;
+  try{ snap = JSON.parse(raw); }catch(e){ snap = null; }
+  if(!snap || !Array.isArray(snap.items)){
+    showToast("O backup salvo está corrompido e não pôde ser restaurado.");
+    return;
+  }
+  if(!sb) return;
+
+  showToast("Desfazendo última alteração…");
+  var delResult = await sb.from("items").delete().neq("id", "__nenhum__");
+  if(delResult.error){ showToast("Erro ao desfazer: " + delResult.error.message); return; }
+  if(snap.items.length){
+    var insResult = await sb.from("items").insert(snap.items.map(function(it){
+      return { id:it.id, nome:it.nome, categoria:it.categoria, raridade:it.raridade, preco:it.preco, estoque:it.estoque, imagem_url:it.imagem || null };
+    }));
+    if(insResult.error){ showToast("Erro ao restaurar itens: " + insResult.error.message); return; }
+  }
+  await sb.from("settings").update({
+    pix_key: snap.pixKey, pix_name: snap.pixName, whatsapp: snap.whats, discord: snap.discord
+  }).eq("id", true);
+
+  try{ localStorage.removeItem(BACKUP_KEY); }catch(e){}
+  document.getElementById("adminUndo").disabled = true;
+  await fetchAll();
+  refreshAllAfterDataChange();
+  showToast("Última alteração desfeita.");
+});
+
+document.getElementById("adminExport").addEventListener("click", function(){
+  try{
+    var blob = new Blob([JSON.stringify(data, null, 2)], { type:"application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    var hoje = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = "backup-capa-das-frutas-" + hoje + ".json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+    showToast("Backup baixado.");
+  }catch(e){
+    showToast("Não foi possível gerar o arquivo de backup agora.");
+  }
+});
+
+document.getElementById("adminImportFile").addEventListener("change", function(e){
+  var file = e.target.files && e.target.files[0];
+  if(!file) return;
+  if(file.size > 5 * 1024 * 1024){
+    showToast("Arquivo de backup grande demais.");
+    e.target.value = "";
+    return;
+  }
+  var reader = new FileReader();
+  reader.onload = async function(){
+    var parsed;
+    try{ parsed = JSON.parse(reader.result); }catch(err){
+      showToast("Esse arquivo não é um backup .json válido.");
+      e.target.value = "";
+      return;
+    }
+    if(!parsed || !Array.isArray(parsed.items)){
+      showToast("Esse arquivo não parece ser um backup do Capa das Frutas.");
+      e.target.value = "";
+      return;
+    }
+    var ok = confirm('Isso vai substituir TODOS os itens do banco de dados pelo conteúdo do arquivo "' + file.name + '". Uma cópia do estado atual é salva neste navegador e pode ser desfeita depois. Continuar?');
+    if(!ok || !sb){ e.target.value = ""; return; }
+
+    snapshotBackup();
+    showToast("Importando backup…");
+
+    var delResult = await sb.from("items").delete().neq("id", "__nenhum__");
+    if(delResult.error){ showToast("Erro ao limpar itens: " + delResult.error.message); e.target.value = ""; return; }
+    if(parsed.items.length){
+      var insResult = await sb.from("items").insert(parsed.items.map(function(it){
+        return { id:it.id, nome:it.nome, categoria:it.categoria, raridade:it.raridade, preco:it.preco, estoque:!!it.estoque, imagem_url:it.imagem || null };
+      }));
+      if(insResult.error){ showToast("Erro ao importar itens: " + insResult.error.message); e.target.value = ""; return; }
+    }
+    if(parsed.pixKey){
+      await sb.from("settings").update({
+        pix_key: parsed.pixKey, pix_name: parsed.pixName || "Capa das Frutas",
+        whatsapp: parsed.whats || "", discord: parsed.discord || ""
+      }).eq("id", true);
+    }
+
+    await fetchAll();
+    refreshAllAfterDataChange();
+    e.target.value = "";
+    showToast("Backup importado com sucesso.");
+  };
+  reader.onerror = function(){ showToast("Não foi possível ler esse arquivo."); };
+  reader.readAsText(file);
+});
+
+document.getElementById("adminSave").addEventListener("click", async function(){
+  if(!sb){ showToast("Conexão com o banco indisponível agora."); return; }
+  var novaSenha = document.getElementById("adminNewPass").value;
+  var novaSenha2 = document.getElementById("adminNewPass2").value;
+  if(novaSenha || novaSenha2){
+    if(novaSenha.length < 6){
+      alert("A nova senha precisa ter pelo menos 6 caracteres.");
+      return;
+    }
+    if(novaSenha !== novaSenha2){
+      alert("As senhas não coincidem.");
+      return;
+    }
+  }
+
+  var novoPixKey = document.getElementById("adminPixKey").value.trim();
+  if(!novoPixKey){
+    alert("A chave Pix não pode ficar vazia.");
+    return;
+  }
+
+  var btn = this;
+  btn.disabled = true;
+  btn.textContent = "Salvando…";
+
+  snapshotBackup();
+
+  var novoPixName = document.getElementById("adminPixName").value.trim() || "Capa das Frutas";
+  var novoWhats = document.getElementById("adminWhats").value.trim().replace(/\D/g, "");
+  var novoDiscord = document.getElementById("adminDiscord").value.trim();
+
+  var setResult = await sb.from("settings").update({
+    pix_key: novoPixKey, pix_name: novoPixName, whatsapp: novoWhats, discord: novoDiscord
+  }).eq("id", true);
+
+  if(setResult.error){
+    btn.disabled = false;
+    btn.textContent = "Salvar tudo";
+    showToast("Não foi possível salvar as configurações: " + setResult.error.message);
+    return;
+  }
+
+  if(novaSenha){
+    var passResult = await sb.auth.updateUser({ password: novaSenha });
+    if(passResult.error){
+      showToast("Configurações salvas, mas a senha não pôde ser trocada: " + passResult.error.message);
+    }
+  }
+
+  data.pixKey = novoPixKey;
+  data.pixName = novoPixName;
+  data.whats = novoWhats;
+  data.discord = novoDiscord;
+
+  btn.disabled = false;
+  btn.textContent = "Salvar tudo";
+  document.getElementById("adminNewPass").value = "";
+  document.getElementById("adminNewPass2").value = "";
+  refreshAllAfterDataChange();
+  showToast("Configurações salvas. Dá pra desfazer no botão acima se algo saiu errado.");
+});
+
+function calcularMediaAvaliacoes(){
+  var revs = data.reviews || [];
+  if(revs.length === 0) return 0;
+  var soma = revs.reduce(function(acc, r){ return acc + (Number(r.nota) || 0); }, 0);
+  return soma / revs.length;
+}
+
+function renderReviews(){
+  var revs = (data.reviews || []).slice().sort(function(a, b){ return (b.data || "").localeCompare(a.data || ""); });
+  var media = calcularMediaAvaliacoes();
+  document.getElementById("rsScore").textContent = media.toFixed(1);
+  document.getElementById("rsCount").textContent = revs.length + (revs.length === 1 ? " avaliação" : " avaliações");
+  document.getElementById("rsStars").textContent = "★".repeat(Math.round(media)) + "☆".repeat(5 - Math.round(media));
+
+  var counts = { 5:0, 4:0, 3:0, 2:0, 1:0 };
+  revs.forEach(function(r){ var n = Math.round(Number(r.nota)); if(counts[n] !== undefined) counts[n]++; });
+  var barsHtml = [5,4,3,2,1].map(function(n){
+    var pct = revs.length ? Math.round((counts[n] / revs.length) * 100) : 0;
+    return '<div class="rs-bar-row"><span>' + n + '★</span><div class="rs-bar-track"><div class="rs-bar-fill" style="width:' + pct + '%;"></div></div><span>' + counts[n] + '</span></div>';
+  }).join("");
+  document.getElementById("rsBars").innerHTML = barsHtml;
+
+  var list = document.getElementById("reviewsList");
+  if(revs.length === 0){
+    list.innerHTML = '<div class="reviews-empty">Ainda não há avaliações. Seja o primeiro a avaliar.</div>';
+    return;
+  }
+  list.innerHTML = revs.map(function(r){
+    var nota = Math.max(1, Math.min(5, Math.round(Number(r.nota) || 0)));
+    var dataFmt = "";
+    try{ dataFmt = new Date(r.data + "T00:00:00").toLocaleDateString("pt-BR"); }catch(e){ dataFmt = r.data || ""; }
+    return '' +
+      '<div class="review-card">' +
+        '<div class="review-top">' +
+          '<span class="review-name">' + escapeHtml(r.nome) + '</span>' +
+          '<span class="review-date">' + dataFmt + '</span>' +
+        '</div>' +
+        '<div class="review-stars" aria-hidden="true">' + "★".repeat(nota) + "☆".repeat(5 - nota) + '</div>' +
+        '<div class="review-text">' + escapeHtml(r.texto) + '</div>' +
+      '</div>';
+  }).join("");
+}
+
+var reviewNotaSelecionada = 0;
+
+function abrirReviewForm(){
+  var nomeSugerido = "";
+  if(currentSession && currentSession.user){
+    nomeSugerido = (currentSession.user.user_metadata && currentSession.user.user_metadata.nome) || "";
+  }
+  document.getElementById("reviewNome").value = nomeSugerido;
+  document.getElementById("reviewTexto").value = "";
+  document.getElementById("reviewError").classList.remove("show");
+  reviewNotaSelecionada = 0;
+  document.querySelectorAll("#starPicker .star-opt").forEach(function(s){ s.classList.remove("active"); });
+  document.getElementById("reviewOverlay").classList.add("open");
+}
+function fecharReviewForm(){ document.getElementById("reviewOverlay").classList.remove("open"); }
+
+document.getElementById("openReviewForm").addEventListener("click", abrirReviewForm);
+document.getElementById("closeReview").addEventListener("click", fecharReviewForm);
+
+document.querySelectorAll("#starPicker .star-opt").forEach(function(btn){
+  btn.addEventListener("click", function(){
+    reviewNotaSelecionada = parseInt(btn.getAttribute("data-val"), 10);
+    document.querySelectorAll("#starPicker .star-opt").forEach(function(s){
+      s.classList.toggle("active", parseInt(s.getAttribute("data-val"), 10) <= reviewNotaSelecionada);
+    });
+  });
+});
+
+document.getElementById("reviewSubmit").addEventListener("click", async function(){
+  if(!sb){ showToast("Conexão com o banco indisponível agora."); return; }
+  var nome = document.getElementById("reviewNome").value.trim();
+  var texto = document.getElementById("reviewTexto").value.trim();
+  var errBox = document.getElementById("reviewError");
+
+  if(!nome || nome.length > 40 || !texto || texto.length > 400 || reviewNotaSelecionada < 1){
+    errBox.textContent = "Preencha nome, nota e um comentário de até 400 caracteres.";
+    errBox.classList.add("show");
+    return;
+  }
+
+  var lastReview = 0;
+  try{ lastReview = parseInt(localStorage.getItem(STORAGE_KEY + "_lastreview") || "0", 10); }catch(e){}
+  if(Date.now() - lastReview < REVIEW_COOLDOWN_MS){
+    errBox.textContent = "Você já enviou uma avaliação agora há pouco. Aguarde um instante.";
+    errBox.classList.add("show");
+    return;
+  }
+
+  var btn = this;
+  btn.disabled = true;
+  btn.textContent = "Publicando…";
+
+  var hoje = new Date().toISOString().slice(0, 10);
+  var insResult = await sb.from("reviews").insert({ nome:nome, nota:reviewNotaSelecionada, texto:texto, data:hoje }).select().single();
+
+  btn.disabled = false;
+  btn.textContent = "Publicar avaliação";
+
+  if(insResult.error){
+    errBox.textContent = "Não foi possível publicar agora: " + insResult.error.message;
+    errBox.classList.add("show");
+    return;
+  }
+
+  data.reviews.unshift(rowToReview(insResult.data));
+  try{ localStorage.setItem(STORAGE_KEY + "_lastreview", String(Date.now())); }catch(e){}
+  renderReviews();
+  fecharReviewForm();
+  showToast("Avaliação publicada, obrigado!");
+});
+
+document.addEventListener("keydown", function(e){
+  if(e.key !== "Escape") return;
+  ["pixOverlay","loginOverlay","adminOverlay","reviewOverlay"].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el && el.classList.contains("open")) el.classList.remove("open");
+  });
+  fecharCarrinho();
+});
+
+(function(){
+  var hero = document.querySelector(".hero");
+  if(hero){
+    hero.addEventListener("pointermove", function(e){
+      var rect = hero.getBoundingClientRect();
+      hero.style.setProperty("--mx", (e.clientX - rect.left) + "px");
+      hero.style.setProperty("--my", (e.clientY - rect.top) + "px");
+    });
+  }
+})();
+
+(function(){
+  var counters = document.querySelectorAll(".n[data-count]");
+  if(!counters.length) return;
+  function animateCounter(el){
+    var target = parseInt(el.getAttribute("data-count"), 10) || 0;
+    var suffix = el.getAttribute("data-suffix") || "";
+    var duration = 900;
+    var startTime = null;
+    function step(ts){
+      if(!startTime) startTime = ts;
+      var progress = Math.min((ts - startTime) / duration, 1);
+      var eased = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.round(target * eased) + suffix;
+      if(progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  if("IntersectionObserver" in window){
+    var obs = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          animateCounter(entry.target);
+          obs.unobserve(entry.target);
+        }
+      });
+    }, { threshold:.4 });
+    counters.forEach(function(c){ obs.observe(c); });
+  } else {
+    counters.forEach(function(c){
+      c.textContent = c.getAttribute("data-count") + (c.getAttribute("data-suffix") || "");
+    });
+  }
+})();
+
+document.addEventListener("keydown", function(e){
+  if(e.key !== "/") return;
+  var tag = (document.activeElement && document.activeElement.tagName) || "";
+  if(tag === "INPUT" || tag === "TEXTAREA") return;
+  e.preventDefault();
+  var input = document.getElementById("searchInput");
+  if(input){ input.focus(); input.select(); }
+});
+
+(function(){
+  var banner = document.createElement("div");
+  banner.className = "offline-banner";
+  banner.id = "offlineBanner";
+  banner.textContent = "Sem conexão com a internet — algumas ações (Pix, WhatsApp, painel) podem não funcionar até reconectar.";
+  document.body.appendChild(banner);
+  function syncStatus(){
+    if(!navigator.onLine) banner.classList.add("show");
+    else banner.classList.remove("show");
+  }
+  window.addEventListener("online", syncStatus);
+  window.addEventListener("offline", syncStatus);
+  syncStatus();
+})();
+
+window.addEventListener("error", function(e){
+  console.error("Erro no site:", e.error || e.message);
+  showToast("Ocorreu um erro inesperado. Recarregue a página se algo parar de responder.");
+});
+window.addEventListener("unhandledrejection", function(e){
+  console.error("Promessa rejeitada:", e.reason);
+});
+
+if(sb){
+  sb.auth.onAuthStateChange(function(_event, session){
+    currentSession = session;
+    syncAuthButton();
+  });
+}
+
+renderGrid();
+renderHero();
+atualizarCarrinho();
+renderReviews();
+syncAuthButton();
+
+fetchAll().then(function(){
+  refreshAllAfterDataChange();
+});
+
+(function(){
+  var canvas = document.getElementById("emberCanvas");
+  if(!canvas) return;
+  var ctx = canvas.getContext("2d");
+  var w, h, particles = [];
+  var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function resize(){
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+  window.addEventListener("resize", resize);
+  resize();
+
+  function spawn(){
+    return {
+      x: Math.random() * w,
+      y: h + 10,
+      r: 1 + Math.random() * 2.2,
+      speed: 0.3 + Math.random() * 0.8,
+      drift: (Math.random() - 0.5) * 0.4,
+      life: 0,
+      maxLife: 400 + Math.random() * 400,
+      hue: Math.random() > 0.5 ? "230,48,79" : "139,123,240"
+    };
+  }
+
+  var count = window.innerWidth < 700 ? 26 : 46;
+  for(var i = 0; i < count; i++){
+    var p = spawn();
+    p.y = Math.random() * h;
+    particles.push(p);
+  }
+
+  function tick(){
+    ctx.clearRect(0, 0, w, h);
+    particles.forEach(function(p){
+      p.y -= p.speed;
+      p.x += p.drift;
+      p.life++;
+      var fade = 1 - (p.life / p.maxLife);
+      if(fade < 0) fade = 0;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(" + p.hue + "," + (fade * 0.55) + ")";
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = "rgba(" + p.hue + ",0.6)";
+      ctx.fill();
+      if(p.y < -10 || p.life > p.maxLife){
+        var fresh = spawn();
+        p.x = fresh.x; p.y = h + 10; p.r = fresh.r; p.speed = fresh.speed;
+        p.drift = fresh.drift; p.life = 0; p.maxLife = fresh.maxLife; p.hue = fresh.hue;
+      }
+    });
+    if(!reduceMotion) requestAnimationFrame(tick);
+  }
+  if(!reduceMotion) requestAnimationFrame(tick);
+})();
+</script>
+
+</body>
+</html>
