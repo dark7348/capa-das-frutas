@@ -227,6 +227,21 @@ footer{padding:44px 0 calc(30px + env(safe-area-inset-bottom,0px));}
 .payment-method-badge{font-size:10px;font-weight:600;color:var(--teal);background:rgba(47,208,201,.12);padding:2px 7px;border-radius:10px;font-family:'IBM Plex Mono',monospace;}
 .payment-method-desc{font-size:11.5px;color:var(--ink-faint);}
 .payment-method-check{color:var(--teal);font-size:16px;flex-shrink:0;}
+
+.comprovantes-badge{background:var(--coral);color:var(--ink-on-accent);font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;padding:0 4px;margin-left:6px;vertical-align:middle;}
+.comprovantes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;}
+.comprovante-thumb{position:relative;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;cursor:pointer;aspect-ratio:1;background:var(--panel-2);display:flex;align-items:center;justify-content:center;}
+.comprovante-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.comprovante-thumb .placeholder{font-size:11px;color:var(--ink-faint);}
+.comprovante-pending-badge{position:absolute;top:5px;right:5px;width:20px;height:20px;border-radius:50%;background:var(--coral);color:var(--ink-on-accent);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;box-shadow:0 0 8px rgba(255,84,112,.6);}
+.comprovante-thumb-name{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.85));color:#fff;font-size:10px;padding:12px 6px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.comprovantes-empty{color:var(--ink-faint);font-size:13px;text-align:center;padding:24px 0;grid-column:1/-1;}
+.comprovante-detail-img{width:100%;border-radius:var(--radius);border:1px solid var(--line);margin-bottom:16px;max-height:60vh;object-fit:contain;background:#000;}
+.comprovante-detail-row{display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-bottom:1px solid var(--line-soft);}
+.comprovante-detail-row span:first-child{color:var(--ink-faint);}
+.comprovante-status-pill{font-size:11px;font-weight:600;padding:3px 10px;border-radius:12px;}
+.status-pendente{background:rgba(255,84,112,.15);color:var(--coral);}
+.status-entregue{background:rgba(47,208,201,.15);color:var(--teal);}
 .pix-qr{background:#fff;padding:14px;border-radius:var(--radius);display:inline-block;margin-bottom:16px;}
 .pix-key-row{display:flex;gap:8px;margin-bottom:18px;}
 .pix-key-row input{flex:1;background:var(--panel-2);border:1px solid var(--line);color:var(--ink);padding:10px 12px;border-radius:var(--radius);font-family:'IBM Plex Mono',monospace;font-size:13px;}
@@ -408,7 +423,7 @@ footer{padding:44px 0 calc(30px + env(safe-area-inset-bottom,0px));}
         <a href="https://discord.gg/tFMqdUH62" target="_blank" rel="noopener">Entrar no Discord</a>
         <a href="#catalogo">Catálogo</a>
         <a href="#avaliacoes">Avaliações</a>
-        <button class="foot-admin" id="openAdmin">⚙ configuração</button>
+        <button class="foot-admin" id="openAdmin">⚙ configuração<span class="comprovantes-badge" id="comprovantesBadge" style="display:none;">0</span></button>
       </div>
     </div>
 
@@ -453,7 +468,15 @@ footer{padding:44px 0 calc(30px + env(safe-area-inset-bottom,0px));}
         <button class="pix-copy" id="copyPixBtn">Copiar</button>
       </div>
       <button class="btn btn-primary" style="width:100%;justify-content:center;" id="sendProofBtn">Já paguei, enviar comprovante</button>
-      <div class="drawer-hint" style="margin-top:14px;">Depois de pagar, mande o print do comprovante na conversa que abrir.</div>
+
+      <div id="comprovanteUploadBox" style="display:none;text-align:left;margin-top:6px;">
+        <div class="field"><label for="comprovanteNome">Seu nome</label><input type="text" id="comprovanteNome" maxlength="60"></div>
+        <div class="field"><label for="comprovanteArquivo">Foto do comprovante</label><input type="file" id="comprovanteArquivo" accept="image/*"></div>
+        <div class="modal-error" id="comprovanteError">Selecione uma foto e preencha seu nome.</div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;" id="comprovanteEnviarBtn">Enviar comprovante</button>
+      </div>
+
+      <div class="drawer-hint" style="margin-top:14px;">Depois de pagar, envie a foto do comprovante para confirmarmos e liberarmos seu pedido.</div>
     </div>
   </div>
 </div>
@@ -495,6 +518,24 @@ footer{padding:44px 0 calc(30px + env(safe-area-inset-bottom,0px));}
         <button type="button" id="customerAuthToggle" style="background:none;border:none;color:var(--teal);cursor:pointer;font-size:inherit;padding:0;">Criar conta</button>
       </div>
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="comprovantesOverlay">
+  <div class="modal modal-wide">
+    <div class="modal-head"><h3>Comprovantes recebidos</h3><button class="close-btn" id="closeComprovantes" aria-label="Fechar">×</button></div>
+    <div class="modal-body">
+      <div class="comprovantes-grid" id="comprovantesGrid">
+        <div class="comprovantes-empty">Carregando…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="comprovanteDetailOverlay">
+  <div class="modal">
+    <div class="modal-head"><h3>Detalhe do comprovante</h3><button class="close-btn" id="closeComprovanteDetail" aria-label="Fechar">×</button></div>
+    <div class="modal-body" id="comprovanteDetailBody"></div>
   </div>
 </div>
 
@@ -558,6 +599,16 @@ footer{padding:44px 0 calc(30px + env(safe-area-inset-bottom,0px));}
           <div class="field"><label>WhatsApp (só números, com DDI+DDD)</label><input type="text" id="adminWhats"></div>
           <div class="field"><label>Link do Discord</label><input type="text" id="adminDiscord"></div>
         </div>
+        <div class="field">
+          <label>Webhook do Discord para avisar sobre novos comprovantes (opcional)</label>
+          <input type="text" id="adminWebhookComprovantes" placeholder="https://discord.com/api/webhooks/...">
+        </div>
+      </div>
+
+      <div class="admin-section">
+        <h4>Comprovantes de pagamento</h4>
+        <div class="admin-note">Toda vez que um cliente envia o print do comprovante, ele aparece aqui. Os pendentes (ainda não marcados como entregues) ficam com uma bolinha vermelha "?" no canto.</div>
+        <button class="btn btn-primary" id="openComprovantes" style="width:100%;justify-content:center;">Ver comprovantes<span class="comprovantes-badge" id="comprovantesBadgeAdmin" style="display:none;">0</span></button>
       </div>
 
       <div class="admin-section">
@@ -670,7 +721,7 @@ var CATEGORIA_LABEL = { "fruta-fisica":"fruta física perm.", "robux":"robux", "
 var CATEGORIA_ICON = { "fruta-fisica":"🍈", "robux":"🪙", "gamepass":"🎟️" };
 
 var state = { catFilter:"todos", rarFilter:"todos", busca:"", carrinho:{}, favoritos:[] };
-var data = { pixKey:DEFAULT_SETTINGS.pixKey, pixName:DEFAULT_SETTINGS.pixName, whats:DEFAULT_SETTINGS.whats, discord:DEFAULT_SETTINGS.discord, items:[], reviews:[] };
+var data = { pixKey:DEFAULT_SETTINGS.pixKey, pixName:DEFAULT_SETTINGS.pixName, whats:DEFAULT_SETTINGS.whats, discord:DEFAULT_SETTINGS.discord, webhookComprovantes:"", items:[], reviews:[] };
 var currentSession = null;
 var dataReady = false;
 
@@ -758,6 +809,7 @@ async function fetchAll(){
     data.pixName = settingsRes.data.pix_name;
     data.whats = settingsRes.data.whatsapp || "";
     data.discord = settingsRes.data.discord || "";
+    data.webhookComprovantes = settingsRes.data.webhook_comprovantes || "";
 
     try{ localStorage.setItem(CACHE_KEY, JSON.stringify(data)); }catch(e){}
     dataReady = true;
@@ -996,7 +1048,11 @@ function abrirPix(){
 
   document.getElementById("pixOverlay").classList.add("open");
 }
-function fecharPix(){ document.getElementById("pixOverlay").classList.remove("open"); }
+function fecharPix(){
+  document.getElementById("pixOverlay").classList.remove("open");
+  document.getElementById("sendProofBtn").style.display = "";
+  document.getElementById("comprovanteUploadBox").style.display = "none";
+}
 
 function pixPayload(chave, nome, valor){
   function emv(id, value){
@@ -1083,9 +1139,119 @@ document.getElementById("copyPixBtn").addEventListener("click", function(){
 });
 
 document.getElementById("sendProofBtn").addEventListener("click", function(){
+  document.getElementById("sendProofBtn").style.display = "none";
+  document.getElementById("comprovanteUploadBox").style.display = "block";
+  var nomeSugerido = "";
+  if(currentSession && currentSession.user){
+    nomeSugerido = (currentSession.user.user_metadata && currentSession.user.user_metadata.nome) || "";
+  }
+  document.getElementById("comprovanteNome").value = nomeSugerido;
+  document.getElementById("comprovanteError").classList.remove("show");
+});
+
+document.getElementById("comprovanteEnviarBtn").addEventListener("click", async function(){
+  if(!sb){ showToast("Conexão com o banco indisponível agora."); return; }
+  var nome = document.getElementById("comprovanteNome").value.trim();
+  var fileInput = document.getElementById("comprovanteArquivo");
+  var file = fileInput.files && fileInput.files[0];
+  var errBox = document.getElementById("comprovanteError");
+
+  if(!nome || nome.length > 60 || !file){
+    errBox.textContent = "Selecione uma foto e preencha seu nome.";
+    errBox.classList.add("show");
+    return;
+  }
+  if(!/^image\//.test(file.type)){
+    errBox.textContent = "O arquivo precisa ser uma imagem.";
+    errBox.classList.add("show");
+    return;
+  }
+  if(file.size > 8 * 1024 * 1024){
+    errBox.textContent = "Imagem muito grande (máx. 8MB).";
+    errBox.classList.add("show");
+    return;
+  }
+
+  var btn = this;
+  btn.disabled = true;
+  btn.textContent = "Enviando…";
+  errBox.classList.remove("show");
+
+  var extMatch = /\.([a-zA-Z0-9]+)$/.exec(file.name || "");
+  var ext = extMatch ? extMatch[1].toLowerCase() : "jpg";
+  var path = Date.now() + "-" + Math.random().toString(36).slice(2, 8) + "." + ext;
+
+  var upResult = await sb.storage.from("comprovantes").upload(path, file, { upsert:false, cacheControl:"3600" });
+  if(upResult.error){
+    btn.disabled = false;
+    btn.textContent = "Enviar comprovante";
+    errBox.textContent = "Não foi possível enviar a imagem: " + upResult.error.message;
+    errBox.classList.add("show");
+    return;
+  }
+
+  var itensSnapshot = Object.keys(state.carrinho).map(function(id){
+    var item = data.items.find(function(i){ return i.id === id; });
+    return item ? { nome:item.nome, qtd:state.carrinho[id], preco:item.preco } : null;
+  }).filter(Boolean);
+  var total = calcularTotal();
+
+  var insResult = await sb.from("comprovantes").insert({
+    nome:nome, itens:itensSnapshot, total:total, imagem_path:path, status:"pendente"
+  }).select().single();
+
+  btn.disabled = false;
+  btn.textContent = "Enviar comprovante";
+
+  if(insResult.error){
+    errBox.textContent = "Não foi possível registrar o comprovante: " + insResult.error.message;
+    errBox.classList.add("show");
+    return;
+  }
+
+  if(data.webhookComprovantes){
+    enviarWebhookComprovante(nome, itensSnapshot, total, path).catch(function(err){
+      console.error("Webhook do Discord falhou:", err);
+    });
+  }
+
   var msg = encodeURIComponent(montarMensagemComprovante());
   window.open("https://wa.me/" + data.whats + "?text=" + msg, "_blank");
+
+  state.carrinho = {};
+  atualizarCarrinho();
+  fecharPix();
+  document.getElementById("sendProofBtn").style.display = "";
+  document.getElementById("comprovanteUploadBox").style.display = "none";
+  fileInput.value = "";
+  showToast("Comprovante enviado! Aguarde a confirmação do vendedor.");
 });
+
+async function enviarWebhookComprovante(nome, itens, total, path){
+  if(!sb || !data.webhookComprovantes) return;
+  var signedResult = await sb.storage.from("comprovantes").createSignedUrl(path, 60 * 60 * 24);
+  var imageUrl = signedResult.data ? signedResult.data.signedUrl : null;
+  var linhas = itens.map(function(it){ return "• " + it.nome + " x" + it.qtd + " — " + formatarPreco(it.preco * it.qtd); }).join("\n") || "(carrinho vazio no envio)";
+  var payload = {
+    content: "📩 Novo comprovante recebido de **" + nome + "**",
+    embeds: [{
+      title: "Comprovante — " + formatarPreco(total),
+      description: linhas,
+      color: 15022400,
+      image: imageUrl ? { url: imageUrl } : undefined,
+      timestamp: new Date().toISOString()
+    }]
+  };
+  try{
+    await fetch(data.webhookComprovantes, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+  }catch(e){
+    console.error("Erro ao enviar webhook:", e);
+  }
+}
 
 document.getElementById("catTabs").querySelectorAll(".cat-tab").forEach(function(tab){
   tab.addEventListener("click", function(){
@@ -1305,14 +1471,149 @@ function abrirAdmin(){
   document.getElementById("adminPixName").value = data.pixName;
   document.getElementById("adminWhats").value = data.whats;
   document.getElementById("adminDiscord").value = data.discord;
+  document.getElementById("adminWebhookComprovantes").value = data.webhookComprovantes || "";
   document.getElementById("adminNewPass").value = "";
   document.getElementById("adminNewPass2").value = "";
   renderAdminTables();
   renderAdminReviews();
   document.getElementById("adminUndo").disabled = !hasBackup();
+  atualizarBadgeComprovantes();
+  iniciarMonitorComprovantes();
   document.getElementById("adminOverlay").classList.add("open");
 }
 document.getElementById("closeAdmin").addEventListener("click", function(){ document.getElementById("adminOverlay").classList.remove("open"); });
+
+var comprovantesCache = [];
+var comprovantesRealtimeChannel = null;
+
+async function contarComprovantesPendentes(){
+  if(!sb) return 0;
+  var result = await sb.from("comprovantes").select("id", { count:"exact", head:true }).eq("status", "pendente");
+  if(result.error){ console.error("Erro ao contar comprovantes pendentes:", result.error); return 0; }
+  return result.count || 0;
+}
+
+async function atualizarBadgeComprovantes(){
+  var n = await contarComprovantesPendentes();
+  [document.getElementById("comprovantesBadge"), document.getElementById("comprovantesBadgeAdmin")].forEach(function(el){
+    if(!el) return;
+    if(n > 0){ el.textContent = n; el.style.display = "inline-flex"; }
+    else { el.style.display = "none"; }
+  });
+}
+
+function iniciarMonitorComprovantes(){
+  if(!sb || comprovantesRealtimeChannel) return;
+  comprovantesRealtimeChannel = sb.channel("comprovantes-admin")
+    .on("postgres_changes", { event:"INSERT", schema:"public", table:"comprovantes" }, function(payload){
+      showToast("📩 Novo comprovante recebido de " + (payload.new && payload.new.nome ? payload.new.nome : "cliente") + "!");
+      atualizarBadgeComprovantes();
+      if(document.getElementById("comprovantesOverlay").classList.contains("open")){
+        carregarComprovantes();
+      }
+    })
+    .subscribe();
+}
+
+async function carregarComprovantes(){
+  var grid = document.getElementById("comprovantesGrid");
+  grid.innerHTML = '<div class="comprovantes-empty">Carregando…</div>';
+  if(!sb){ grid.innerHTML = '<div class="comprovantes-empty">Conexão indisponível.</div>'; return; }
+
+  var result = await sb.from("comprovantes").select("*").order("criado_em", { ascending:false });
+  if(result.error){
+    grid.innerHTML = '<div class="comprovantes-empty">Não foi possível carregar: ' + escapeHtml(result.error.message) + '</div>';
+    return;
+  }
+
+  comprovantesCache = result.data || [];
+  if(comprovantesCache.length === 0){
+    grid.innerHTML = '<div class="comprovantes-empty">Nenhum comprovante recebido ainda.</div>';
+    atualizarBadgeComprovantes();
+    return;
+  }
+
+  var withUrls = await Promise.all(comprovantesCache.map(async function(c){
+    var signed = await sb.storage.from("comprovantes").createSignedUrl(c.imagem_path, 60 * 30);
+    return { c:c, url: signed.data ? signed.data.signedUrl : null };
+  }));
+
+  grid.innerHTML = withUrls.map(function(entry){
+    var c = entry.c;
+    var pendente = c.status === "pendente";
+    var img = entry.url
+      ? '<img src="' + entry.url + '" alt="" loading="lazy">'
+      : '<span class="placeholder">sem imagem</span>';
+    return '' +
+      '<div class="comprovante-thumb" data-id="' + c.id + '">' +
+        img +
+        (pendente ? '<span class="comprovante-pending-badge">?</span>' : '') +
+        '<span class="comprovante-thumb-name">' + escapeHtml(c.nome) + '</span>' +
+      '</div>';
+  }).join("");
+
+  grid.querySelectorAll(".comprovante-thumb").forEach(function(el){
+    el.addEventListener("click", function(){ abrirDetalheComprovante(el.getAttribute("data-id")); });
+  });
+
+  atualizarBadgeComprovantes();
+}
+
+async function abrirDetalheComprovante(id){
+  var c = comprovantesCache.find(function(x){ return x.id === id; });
+  if(!c) return;
+  var body = document.getElementById("comprovanteDetailBody");
+  body.innerHTML = '<div class="comprovantes-empty">Carregando imagem…</div>';
+  document.getElementById("comprovanteDetailOverlay").classList.add("open");
+
+  var signed = await sb.storage.from("comprovantes").createSignedUrl(c.imagem_path, 60 * 30);
+  var url = signed.data ? signed.data.signedUrl : null;
+  var itensHtml = (c.itens || []).map(function(it){
+    return '<div class="comprovante-detail-row"><span>' + escapeHtml(it.nome) + ' x' + it.qtd + '</span><span>' + formatarPreco(it.preco * it.qtd) + '</span></div>';
+  }).join("");
+  var dataFmt = "";
+  try{ dataFmt = new Date(c.criado_em).toLocaleString("pt-BR"); }catch(e){ dataFmt = c.criado_em; }
+
+  body.innerHTML = '' +
+    (url ? '<img class="comprovante-detail-img" src="' + url + '" alt="Comprovante de ' + escapeHtml(c.nome) + '">' : '<div class="comprovantes-empty">Não foi possível carregar a imagem.</div>') +
+    '<div class="comprovante-detail-row"><span>Cliente</span><span>' + escapeHtml(c.nome) + '</span></div>' +
+    '<div class="comprovante-detail-row"><span>Recebido em</span><span>' + escapeHtml(dataFmt) + '</span></div>' +
+    '<div class="comprovante-detail-row"><span>Status</span><span class="comprovante-status-pill status-' + c.status + '">' + (c.status === "pendente" ? "Pendente" : "Entregue") + '</span></div>' +
+    (itensHtml || '<div class="comprovante-detail-row"><span>Itens</span><span>(não registrado)</span></div>') +
+    '<div class="comprovante-detail-row" style="border-bottom:none;font-weight:700;"><span>Total</span><span>' + formatarPreco(c.total) + '</span></div>' +
+    '<div style="display:flex;gap:10px;margin-top:16px;">' +
+      '<button class="btn btn-primary" style="flex:1;justify-content:center;" id="marcarEntregueBtn">' + (c.status === "pendente" ? "Marcar como entregue" : "Marcar como pendente de novo") + '</button>' +
+      '<button class="btn btn-ghost" id="excluirComprovanteBtn">Excluir</button>' +
+    '</div>';
+
+  document.getElementById("marcarEntregueBtn").addEventListener("click", async function(){
+    var novoStatus = c.status === "pendente" ? "entregue" : "pendente";
+    var upd = await sb.from("comprovantes").update({ status:novoStatus }).eq("id", c.id);
+    if(upd.error){ showToast("Não foi possível atualizar: " + upd.error.message); return; }
+    c.status = novoStatus;
+    document.getElementById("comprovanteDetailOverlay").classList.remove("open");
+    carregarComprovantes();
+    showToast(novoStatus === "entregue" ? "Marcado como entregue." : "Marcado como pendente novamente.");
+  });
+  document.getElementById("excluirComprovanteBtn").addEventListener("click", async function(){
+    var ok = confirm("Excluir esse comprovante? A imagem some do histórico.");
+    if(!ok) return;
+    var del = await sb.from("comprovantes").delete().eq("id", c.id);
+    if(del.error){ showToast("Não foi possível excluir: " + del.error.message); return; }
+    await sb.storage.from("comprovantes").remove([c.imagem_path]);
+    document.getElementById("comprovanteDetailOverlay").classList.remove("open");
+    carregarComprovantes();
+    showToast("Comprovante excluído.");
+  });
+}
+
+document.getElementById("openComprovantes").addEventListener("click", function(){
+  document.getElementById("comprovantesOverlay").classList.add("open");
+  carregarComprovantes();
+});
+document.getElementById("closeComprovantes").addEventListener("click", function(){ document.getElementById("comprovantesOverlay").classList.remove("open"); });
+document.getElementById("closeComprovanteDetail").addEventListener("click", function(){ document.getElementById("comprovanteDetailOverlay").classList.remove("open"); });
+
 
 function raridadeOptions(selected){
   return Object.keys(RARIDADE_LABEL).map(function(r){
@@ -1679,9 +1980,10 @@ document.getElementById("adminSave").addEventListener("click", async function(){
   var novoPixName = document.getElementById("adminPixName").value.trim() || "Capa das Frutas";
   var novoWhats = document.getElementById("adminWhats").value.trim().replace(/\D/g, "");
   var novoDiscord = document.getElementById("adminDiscord").value.trim();
+  var novoWebhook = document.getElementById("adminWebhookComprovantes").value.trim();
 
   var setResult = await sb.from("settings").update({
-    pix_key: novoPixKey, pix_name: novoPixName, whatsapp: novoWhats, discord: novoDiscord
+    pix_key: novoPixKey, pix_name: novoPixName, whatsapp: novoWhats, discord: novoDiscord, webhook_comprovantes: novoWebhook || null
   }).eq("id", true);
 
   if(setResult.error){
@@ -1702,6 +2004,7 @@ document.getElementById("adminSave").addEventListener("click", async function(){
   data.pixName = novoPixName;
   data.whats = novoWhats;
   data.discord = novoDiscord;
+  data.webhookComprovantes = novoWebhook;
 
   btn.disabled = false;
   btn.textContent = "Salvar tudo";
@@ -1827,7 +2130,7 @@ document.getElementById("reviewSubmit").addEventListener("click", async function
 
 document.addEventListener("keydown", function(e){
   if(e.key !== "Escape") return;
-  ["pixOverlay","loginOverlay","adminOverlay","reviewOverlay"].forEach(function(id){
+  ["pixOverlay","loginOverlay","adminOverlay","reviewOverlay","customerAuthOverlay","comprovantesOverlay","comprovanteDetailOverlay"].forEach(function(id){
     var el = document.getElementById(id);
     if(el && el.classList.contains("open")) el.classList.remove("open");
   });
