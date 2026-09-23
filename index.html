@@ -1319,6 +1319,41 @@ document.getElementById("loginSubmit").addEventListener("click", tentarLogin);
 document.getElementById("loginPass").addEventListener("keydown", function(e){ if(e.key === "Enter") tentarLogin(); });
 document.getElementById("loginEmail").addEventListener("keydown", function(e){ if(e.key === "Enter") tentarLogin(); });
 
+var LOGIN_MAX_TENTATIVAS = 5;
+var LOGIN_BLOQUEIO_MS = 5 * 60 * 1000;
+
+function checarBloqueioLogin(escopo){
+  var lockKey = STORAGE_KEY + "_lock_" + escopo;
+  var lockUntil = 0;
+  try{ lockUntil = parseInt(localStorage.getItem(lockKey) || "0", 10); }catch(e){}
+  if(lockUntil > Date.now()){
+    var minutos = Math.ceil((lockUntil - Date.now()) / 60000);
+    return "Muitas tentativas seguidas. Tente de novo em " + minutos + " min.";
+  }
+  return null;
+}
+function registrarFalhaLogin(escopo){
+  var countKey = STORAGE_KEY + "_failcount_" + escopo;
+  var lockKey = STORAGE_KEY + "_lock_" + escopo;
+  var count = 0;
+  try{ count = parseInt(localStorage.getItem(countKey) || "0", 10); }catch(e){}
+  count++;
+  try{
+    if(count >= LOGIN_MAX_TENTATIVAS){
+      localStorage.setItem(lockKey, String(Date.now() + LOGIN_BLOQUEIO_MS));
+      localStorage.setItem(countKey, "0");
+    } else {
+      localStorage.setItem(countKey, String(count));
+    }
+  }catch(e){}
+}
+function limparFalhasLogin(escopo){
+  try{
+    localStorage.removeItem(STORAGE_KEY + "_failcount_" + escopo);
+    localStorage.removeItem(STORAGE_KEY + "_lock_" + escopo);
+  }catch(e){}
+}
+
 async function tentarLogin(){
   if(!sb){ showToast("Conexão com o banco indisponível agora."); return; }
   var email = document.getElementById("loginEmail").value.trim();
@@ -1330,16 +1365,24 @@ async function tentarLogin(){
     errBox.classList.add("show");
     return;
   }
+  var bloqueio = checarBloqueioLogin("admin");
+  if(bloqueio){
+    errBox.textContent = bloqueio;
+    errBox.classList.add("show");
+    return;
+  }
   btn.disabled = true;
   btn.textContent = "Entrando…";
   var result = await sb.auth.signInWithPassword({ email:email, password:senha });
   btn.disabled = false;
   btn.textContent = "Entrar";
   if(result.error){
+    registrarFalhaLogin("admin");
     errBox.textContent = "E-mail ou senha incorretos.";
     errBox.classList.add("show");
     return;
   }
+  limparFalhasLogin("admin");
   currentSession = result.data.session;
   var checagem = await isAdminUser(currentSession);
   document.getElementById("loginOverlay").classList.remove("open");
@@ -1421,6 +1464,14 @@ document.getElementById("customerAuthSubmit").addEventListener("click", async fu
     return;
   }
 
+  var escopo = customerAuthMode === "cadastro" ? "cliente_cadastro" : "cliente_login";
+  var bloqueio = checarBloqueioLogin(escopo);
+  if(bloqueio){
+    errBox.textContent = bloqueio;
+    errBox.classList.add("show");
+    return;
+  }
+
   btn.disabled = true;
 
   if(customerAuthMode === "cadastro"){
@@ -1436,15 +1487,17 @@ document.getElementById("customerAuthSubmit").addEventListener("click", async fu
     btn.disabled = false;
     btn.textContent = "Criar conta";
     if(signUpResult.error){
+      registrarFalhaLogin(escopo);
       errBox.textContent = signUpResult.error.message.indexOf("already") !== -1
         ? "Esse e-mail já tem conta. Tente entrar em vez de criar uma nova."
         : "Não foi possível criar a conta: " + signUpResult.error.message;
       errBox.classList.add("show");
       return;
     }
+    limparFalhasLogin(escopo);
     currentSession = signUpResult.data.session;
     if(!currentSession){
-      showToast("Conta criada. Confirme seu e-mail (se pedido) e depois entre normalmente.");
+      showToast("Conta criada! Confirme seu e-mail (a gente te mandou um link) e depois entre normalmente.");
       document.getElementById("customerAuthOverlay").classList.remove("open");
       return;
     }
@@ -1454,10 +1507,12 @@ document.getElementById("customerAuthSubmit").addEventListener("click", async fu
     btn.disabled = false;
     btn.textContent = "Entrar";
     if(loginResult.error){
+      registrarFalhaLogin(escopo);
       errBox.textContent = "E-mail ou senha incorretos.";
       errBox.classList.add("show");
       return;
     }
+    limparFalhasLogin(escopo);
     currentSession = loginResult.data.session;
   }
 
