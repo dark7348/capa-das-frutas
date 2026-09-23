@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=initTurnstile&render=explicit" async defer></script>
 <style>
 :root{
   --bg:#0b0710; --bg-deep:#05030a; --panel:#150e1c; --panel-2:#1d1426;
@@ -498,6 +499,7 @@ footer{padding:44px 0 calc(30px + env(safe-area-inset-bottom,0px));}
         </div>
       </div>
       <div class="field"><label for="reviewTexto">Comentário</label><input type="text" id="reviewTexto" maxlength="400" autocomplete="off"></div>
+      <div id="turnstileReview" style="margin-bottom:14px;"></div>
       <button class="btn btn-primary" style="width:100%;justify-content:center;" id="reviewSubmit">Publicar avaliação</button>
       <div class="drawer-hint" style="margin-top:12px;">A avaliação fica salva neste site e pode ser removida pelo administrador se for spam ou ofensiva.</div>
     </div>
@@ -512,6 +514,7 @@ footer{padding:44px 0 calc(30px + env(safe-area-inset-bottom,0px));}
       <div class="field" id="customerNomeField" style="display:none;"><label for="customerNome">Seu nome</label><input type="text" id="customerNome" maxlength="40" autocomplete="name"></div>
       <div class="field"><label for="customerEmail">E-mail</label><input type="email" id="customerEmail" autocomplete="email"></div>
       <div class="field"><label for="customerPass">Senha</label><input type="password" id="customerPass" autocomplete="current-password"></div>
+      <div id="turnstileCustomer" style="margin-bottom:14px;"></div>
       <button class="btn btn-primary" style="width:100%;justify-content:center;" id="customerAuthSubmit">Entrar</button>
       <div class="drawer-hint" style="margin-top:14px;">
         <span id="customerAuthToggleText">Ainda não tem conta?</span>
@@ -546,6 +549,7 @@ footer{padding:44px 0 calc(30px + env(safe-area-inset-bottom,0px));}
       <div class="modal-error" id="loginError">E-mail ou senha incorretos.</div>
       <div class="field"><label for="loginEmail">E-mail de administrador</label><input type="email" id="loginEmail" autocomplete="username"></div>
       <div class="field"><label for="loginPass">Senha</label><input type="password" id="loginPass" autocomplete="current-password"></div>
+      <div id="turnstileLogin" style="margin-bottom:14px;"></div>
       <button class="btn btn-primary" style="width:100%;justify-content:center;" id="loginSubmit">Entrar</button>
     </div>
   </div>
@@ -656,6 +660,27 @@ footer{padding:44px 0 calc(30px + env(safe-area-inset-bottom,0px));}
 <script>
 var SUPABASE_URL = "https://gcbqabclpyyhedpnmjte.supabase.co";
 var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdjYnFhYmNscHl5aGVkcG5tanRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5NjU4MzgsImV4cCI6MjEwNTU0MTgzOH0.dwFNtoLT9klXQEuN6Sh0YKDt996g6w9XKnsUooSGof4";
+var TURNSTILE_SITE_KEY = "0x4AAAAAAFBiF_qmLOPHwz1I";
+var turnstileWidgets = { login:null, customer:null, review:null };
+
+window.initTurnstile = function(){
+  if(!window.turnstile) return;
+  var loginEl = document.getElementById("turnstileLogin");
+  var customerEl = document.getElementById("turnstileCustomer");
+  var reviewEl = document.getElementById("turnstileReview");
+  if(loginEl) turnstileWidgets.login = turnstile.render(loginEl, { sitekey:TURNSTILE_SITE_KEY, theme:"dark" });
+  if(customerEl) turnstileWidgets.customer = turnstile.render(customerEl, { sitekey:TURNSTILE_SITE_KEY, theme:"dark" });
+  if(reviewEl) turnstileWidgets.review = turnstile.render(reviewEl, { sitekey:TURNSTILE_SITE_KEY, theme:"dark" });
+};
+
+function obterTokenTurnstile(chave){
+  if(!window.turnstile || !turnstileWidgets[chave]) return "";
+  try{ return turnstile.getResponse(turnstileWidgets[chave]) || ""; }catch(e){ return ""; }
+}
+function resetarTurnstile(chave){
+  if(!window.turnstile || !turnstileWidgets[chave]) return;
+  try{ turnstile.reset(turnstileWidgets[chave]); }catch(e){}
+}
 var sb = null;
 try{
   sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -1310,6 +1335,7 @@ document.getElementById("openAdmin").addEventListener("click", async function(){
   document.getElementById("loginEmail").value = "";
   document.getElementById("loginPass").value = "";
   document.getElementById("loginError").classList.remove("show");
+  resetarTurnstile("login");
   document.getElementById("loginOverlay").classList.add("open");
 });
 document.getElementById("closeLogin").addEventListener("click", function(){ document.getElementById("loginOverlay").classList.remove("open"); });
@@ -1371,9 +1397,16 @@ async function tentarLogin(){
     errBox.classList.add("show");
     return;
   }
+  var captchaToken = obterTokenTurnstile("login");
+  if(!captchaToken){
+    errBox.textContent = "Confirme que você não é um robô.";
+    errBox.classList.add("show");
+    return;
+  }
   btn.disabled = true;
   btn.textContent = "Entrando…";
-  var result = await sb.auth.signInWithPassword({ email:email, password:senha });
+  var result = await sb.auth.signInWithPassword({ email:email, password:senha, options:{ captchaToken:captchaToken } });
+  resetarTurnstile("login");
   btn.disabled = false;
   btn.textContent = "Entrar";
   if(result.error){
@@ -1432,6 +1465,7 @@ document.getElementById("customerAuthBtn").addEventListener("click", async funct
   document.getElementById("customerPass").value = "";
   document.getElementById("customerNome").value = "";
   document.getElementById("customerAuthError").classList.remove("show");
+  resetarTurnstile("customer");
   document.getElementById("customerAuthOverlay").classList.add("open");
 });
 document.getElementById("closeCustomerAuth").addEventListener("click", function(){ document.getElementById("customerAuthOverlay").classList.remove("open"); });
@@ -1471,6 +1505,12 @@ document.getElementById("customerAuthSubmit").addEventListener("click", async fu
     errBox.classList.add("show");
     return;
   }
+  var captchaTokenCliente = obterTokenTurnstile("customer");
+  if(!captchaTokenCliente){
+    errBox.textContent = "Confirme que você não é um robô.";
+    errBox.classList.add("show");
+    return;
+  }
 
   btn.disabled = true;
 
@@ -1483,7 +1523,8 @@ document.getElementById("customerAuthSubmit").addEventListener("click", async fu
       return;
     }
     btn.textContent = "Criando conta…";
-    var signUpResult = await sb.auth.signUp({ email:email, password:senha, options:{ data:{ nome:nome } } });
+    var signUpResult = await sb.auth.signUp({ email:email, password:senha, options:{ data:{ nome:nome }, captchaToken:captchaTokenCliente } });
+    resetarTurnstile("customer");
     btn.disabled = false;
     btn.textContent = "Criar conta";
     if(signUpResult.error){
@@ -1503,7 +1544,8 @@ document.getElementById("customerAuthSubmit").addEventListener("click", async fu
     }
   } else {
     btn.textContent = "Entrando…";
-    var loginResult = await sb.auth.signInWithPassword({ email:email, password:senha });
+    var loginResult = await sb.auth.signInWithPassword({ email:email, password:senha, options:{ captchaToken:captchaTokenCliente } });
+    resetarTurnstile("customer");
     btn.disabled = false;
     btn.textContent = "Entrar";
     if(loginResult.error){
@@ -2122,6 +2164,7 @@ function abrirReviewForm(){
   document.getElementById("reviewNome").value = nomeSugerido;
   document.getElementById("reviewTexto").value = "";
   document.getElementById("reviewError").classList.remove("show");
+  resetarTurnstile("review");
   reviewNotaSelecionada = 0;
   document.querySelectorAll("#starPicker .star-opt").forEach(function(s){ s.classList.remove("active"); });
   document.getElementById("reviewOverlay").classList.add("open");
@@ -2160,23 +2203,40 @@ document.getElementById("reviewSubmit").addEventListener("click", async function
     return;
   }
 
-  var btn = this;
-  btn.disabled = true;
-  btn.textContent = "Publicando…";
-
-  var hoje = new Date().toISOString().slice(0, 10);
-  var insResult = await sb.from("reviews").insert({ nome:nome, nota:reviewNotaSelecionada, texto:texto, data:hoje }).select().single();
-
-  btn.disabled = false;
-  btn.textContent = "Publicar avaliação";
-
-  if(insResult.error){
-    errBox.textContent = "Não foi possível publicar agora: " + insResult.error.message;
+  var captchaTokenReview = obterTokenTurnstile("review");
+  if(!captchaTokenReview){
+    errBox.textContent = "Confirme que você não é um robô.";
     errBox.classList.add("show");
     return;
   }
 
-  data.reviews.unshift(rowToReview(insResult.data));
+  var btn = this;
+  btn.disabled = true;
+  btn.textContent = "Publicando…";
+
+  var respostaFn = null;
+  try{
+    var fnRes = await fetch(SUPABASE_URL + "/functions/v1/submit-review", {
+      method: "POST",
+      headers: { "Content-Type":"application/json", "apikey":SUPABASE_ANON_KEY, "Authorization":"Bearer " + SUPABASE_ANON_KEY },
+      body: JSON.stringify({ nome:nome, nota:reviewNotaSelecionada, texto:texto, token:captchaTokenReview })
+    });
+    respostaFn = await fnRes.json();
+    if(!fnRes.ok) throw new Error(respostaFn.error || "Erro ao publicar.");
+  }catch(err){
+    resetarTurnstile("review");
+    btn.disabled = false;
+    btn.textContent = "Publicar avaliação";
+    errBox.textContent = "Não foi possível publicar agora: " + err.message;
+    errBox.classList.add("show");
+    return;
+  }
+
+  resetarTurnstile("review");
+  btn.disabled = false;
+  btn.textContent = "Publicar avaliação";
+
+  data.reviews.unshift(rowToReview(respostaFn.data));
   try{ localStorage.setItem(STORAGE_KEY + "_lastreview", String(Date.now())); }catch(e){}
   renderReviews();
   fecharReviewForm();
